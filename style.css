@@ -136,7 +136,7 @@ em {
     float: right;
     width: 300px;
     height: 75px;
-    background: url("./lalogo.png") no-repeat;
+    background: url("lalogo.png") no-repeat;
 }
 
 #logospaceca {
@@ -144,7 +144,7 @@ em {
     float: right;
     width: 250px;
     height: 75px;
-    background: url("./calogo.png") no-repeat;
+    background: url("calogo.png") no-repeat;
     background-size: 250px 75px;
 }
 
@@ -152,7 +152,7 @@ em {
     height: 1px;
     width: 100%;
     clear: both;
-    background: #305165 url("./colorband.png") center no-repeat;
+    background: #305165 url("colorband.png") center no-repeat;
 }
 
 #wrapper {
@@ -196,7 +196,7 @@ em {
         float: right;
         width: 75px;
         height: 75px;
-        background: url("./lalogo-small.png") no-repeat;
+        background: url("lalogo-small.png") no-repeat;
         background-size: 75px 75px;
     }
 
@@ -205,7 +205,7 @@ em {
         float: right;
         width: 75px;
         height: 75px;
-        background: url("./calogo-small.png") no-repeat;
+        background: url("calogo-small.png") no-repeat;
         background-size: 70px 70px;
     }
 }
