@@ -1,0 +1,3101 @@
+<html>
+<head>
+    <title>Build Your Own Linux: Presented by Linux Academy</title>
+    <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.3.2/jquery.min.js" type="text/javascript"></script>
+    <script src="toc.js"></script>
+    <link rel="stylesheet" type="text/css" href="style.css">
+        <script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-89555927-1', 'auto');
+  ga('send', 'pageview');
+
+</script>
+</head>
+<body>
+    <div id="header">
+            <div id="hwrapper">
+            <div id="namespace"><h1>Build Your Own Linux</h1></div>
+            <div id="logospaceca"></div>
+            <div id="logospace"></div>
+            <div id="colorbar"></div>
+        </div>
+    </div>
+    <div id="wrapper">
+<div id="toc"></div>
+<div id="content">
+    <p class="intro">"Build Your Own Linux (From Scratch)" walks users through building a basic Linux distribution. Presented by <a href="http://www.linuxacademy.com?utm_source=website&utm_medium=buildyourownlinux&utm_campaign=continuous">Linux Academy</a> & <a href="https://www.cloudassessments.com/?utm_source=website&utm_medium=buildyourownlinux&utm_campaign=continuous" target="_blank">Cloud Assessments</a>. Access the main Linux Academy website to view related course videos and other content, and the Cloud Assessments website for free cloud training powered by AI.</p>
+    <p class="comed"><a href="https://linuxacademy.com/join/community?utm_source=website&utm_medium=buildyourownlinux&utm_campaign=continuous">Join the Linux Academy community for free to chat with thousands of like-minded Linux experts.</a></p>
+<h2 id="section-1">Section 1</h2>
+<h3 id="our-goal">Our Goal</h3>
+<h4 id="what-we-are-building">What We are Building</h4>
+<p>This course walks through the creation of a 64-bit system based on the Linux kernel. Our goal is to produce a small, sleek system well-suited for hosting containers or being employed as a virtual machine.</p>
+<p>Because we don't need every piece of functionality under the sun, we're not going to include every piece of software you might find in a typical distro. This distribution is intended to be minimal.</p>
+<p>Here is what our end-result will look like:</p>
+<ul>
+<li>64-bit Linux 4.8 Kernel with GCC 6.2 and glibc 2.24</li>
+<li>A system compatible with both EFI and BIOS hardware</li>
+<li>Bootable with GRUB2</li>
+<li>A VFAT formatted partition for GRUB/UEFI</li>
+<li>A boot partition</li>
+<li>A root partition</li>
+</ul>
+<h4 id="what-we-are-learning">What We are Learning</h4>
+<p>This course provides step-by-step instructions in an effort to build the Linux kernel, the GNU C Standard Library implementation, GCC, and user-land binaries from source. The tasks are presented in linear order, and must be followed sequentially, as later tasks have dependencies on early tasks. Do not skip around.</p>
+<p>Following this guide as intended will, in turn, enlighten you to many of the "hows" and "whys" of Linux, and assist in your ability to do tasks such as:</p>
+<ul>
+<li>Troubleshooting issues with the kernel</li>
+<li>Troubleshooting issues with user-land software</li>
+<li>Understanding the rationale behind various security systems and measures</li>
+<li>Performance tuning the kernel</li>
+<li>Performance tuning user-land binaries</li>
+<li>Building or "rolling" your own distribution</li>
+<li>Building user-land binaries from source</li>
+</ul>
+<p class="return"><a href="index.html">Back to top</a></p>
+<h3 id="required-skills-and-knowledge">Required Skills and Knowledge</h3>
+<p>We make extensive use of VirtualBox in this course. Working knowledge of VirtualBox and a solid foundation in Linux and Linux troubleshooting are essential. If you're not as familiar with VirtualBox as you would like, take a look at the "How to Install CentOS 7 with VirtualBox" lesson in the "Linux Essentials Certification" course. That course, as well, provides the foundational knowledge required for this course.</p>
+<p class="return"><a href="index.html">Back to top</a></p>
+<h3 id="standards">Standards</h3>
+<p>As we progress through this course, we will adhere to the FHS (Filesystem Hierarchy Standard) specification, version 3.0. We will adhere (mostly) to the LSB (Linux Standard Base) specification, version 5.0. See the pertinent sections in this guide for more information on these two topics.</p>
+<p class="return"><a href="index.html">Back to top</a></p>
+<h3 id="filesystem-hierarchy-standard">Filesystem Hierarchy Standard</h3>
+<p>We follow the FHS 3.0 specification in this course. The FHS provides guidance as to how the filesystem should be structured in terms of directory structure, partition location, and directory use.</p>
+<p>FHS 3.0 specifies four major file categories:</p>
+<ul>
+<li>Static OR variable</li>
+<li>Shareable OR unshareable</li>
+</ul>
+<p>It would seem there are two categories above; however, there are not. "Static" and "variable" represent two mutually-exclusive categories, as do "shareable" and "unshareable."</p>
+<p>A file must fit into one of these four categories; that is, it must be static or variable, shareable or unsharable or some combination thereof. All files fall into two of the four categories, without exception.</p>
+<p>The following directories are required in the primary (or root) hierarchy; their use is as noted.</p>
+<ul>
+<li><code>bin</code> :: Essential binaries</li>
+<li><code>boot</code> :: Static boot-related files</li>
+<li><code>dev</code> :: Device files</li>
+<li><code>etc</code> :: Host-specific system configuration.</li>
+<li><code>lib</code> :: Essential shared libraries and kernel modules</li>
+<li><code>media</code> :: Mount point for removable media</li>
+<li><code>mnt</code> :: Mount point for temporarily mounting a filesystem</li>
+<li><code>opt</code> :: Add-on software</li>
+<li><code>run</code> :: Data relevant to running processes; <code>/var/run</code> is used more frequently</li>
+<li><code>sbin</code> :: Essential system binaries</li>
+<li><code>srv</code> :: Data for services provided</li>
+<li><code>tmp</code> :: Temporary files</li>
+<li><code>usr</code> :: Secondary hierarchy; identical to primary (root) hierarchy</li>
+<li><code>var</code> :: Variable (non-static) data</li>
+</ul>
+<p>User home directories are located in <code>/usr/home</code>, which is linked to <code>/home</code>. This standard also specifies in detail which binaries are required; more information regarding this may be found at
+<a href="http://refspecs.linuxfoundation.org/">http://refspecs.linuxfoundation.org/</a>.</p>
+<p class="return"><a href="index.html">Back to top</a></p>
+<h3 id="linux-standard-base">Linux Standard Base</h3>
+<p>We follow the LSB Core Specification for the 64-bit x86 platform, as outlined at
+<a href="https://refspecs.linuxfoundation.org/LSB_5.0.0/LSB-Core-AMD64/LSB-Core-AMD64/book1.html">https://refspecs.linuxfoundation.org/LSB_5.0.0/LSB-Core-AMD64/LSB-Core-AMD64/book1.html</a>.</p>
+<p>The LSB standard is expansive, and outside of the scope of this course. Adherence and deviance from the standard will be pointed out in the course where we feel it is important to do so.</p>
+<p class="return"><a href="index.html">Back to top</a></p>
+<h3 id="a-word-on-linux">A Word on Linux</h3>
+<p>"Linux" as a term refers to two things: First, it refers specifically to the Linux kernel. Second, in a broader sense, it refers to the various packagings of the Linux kernel with other programs to provide the functionality required of a complete operating system.</p>
+<p>Sound strange? It's not; it's one of the things that makes Linux so versatile. The kernel itself manages the hardware, memory, and the other parts of a computer system which are typically opaque to installed programs.</p>
+<p>Programs installed to provide additional functionality are referred to as "user-land" or "the user-land." The combination of kernel and user-land constitute what are referred to as "distributions," many of which we are familiar: Red Hat Enterprise Linux, Ubuntu, Arch, Fedora, and so on.</p>
+<p>In a broad sense, the term "Linux" refers to the operating systems created by the pairing of kernel and user-land, but the term is ambiguous. "Distribution," on the other hand, refers to the pairing of the kernel with a user-land built to some specification. Ubuntu, for instance, varies quite a bit from CentOS 6. Both of these are separate distributions of Linux.</p>
+<p>Unlike operating systems, which are built in a monolithic fashion (where the user-land and kernel are tightly-coupled, such as FreeBSD, VMS, Windows, etc.), Linux allows for variations on theme which number into the thousands. The term "distro" better fits these variations, as each one is not entirely unique from the next (because of the shared kernel) but may differ substantially in terms of the user-land.</p>
+<p class="return"><a href="index.html">Back to top</a></p>
+<h2 id="section-2">Section 2</h2>
+<h3 id="prerequisites-build-system-specifications">Prerequisites: Build System Specifications</h3>
+<h4 id="kerneldistro-version">Kernel/Distro Version</h4>
+<p>We use Fedora Core 24 in this course. You can run any distribution which uses a 4.x kernel, but be aware that doing so may introduce inconsistencies into the build process. Some distributions may package utilities using older or incompatible versions than what ia needed in this course.</p>
+<h4 id="clean-install">Clean Install</h4>
+<p>We strongly recommend that you use a clean install for the build system.</p>
+<p>Notice we undertake the whole of this course in a virtual machine running in VirtualBox; we do this to facilitate the building of Linux in a clean environment.</p>
+<p>Any virtualization environment will do, provided you have access to the console, as it may be necessary at various points. Actual hardware is also acceptable, if those resources are readily available to you.</p>
+<h4 id="build-system-disk-partitions">Build System Disk Partitions</h4>
+<p>The build system — the virtual machine we use to build Linux — uses the following disk layout. This output is from the <code>parted print all</code> command:</p>
+<pre><code>Number  Start   End     Size    Type     File system     Flags
+1      1049kB  525MB   524MB   primary  ext4            boot
+2      525MB   19.3GB  18.8GB  primary  ext4
+3      19.3GB  21.5GB  2147MB  primary  linux-swap(v1)
+</code></pre>
+<p>Whilst we walk through the creation of the destination drive (where our newly-built distribution will be installed) in the videos, you should have the proficiency to install Linux and the necessary tools prior to undertaking this course. It is strongly recommended that you take the "Linux Essentials" course on <a href="http://LinuxAcademy.com">LinuxAcademy.com</a> if your Linux skills are not quite at this level.</p>
+<p class="return"><a href="index.html">Back to top</a></p>
+<h3 id="development-tools">Development Tools</h3>
+<p>We'll need GCC, binutils, and other software packages installed with the "development tools" package group. You can select this during the installation process, or you can install using the <code>group</code> install option for <code>yum</code> or <code>dnf</code>. Note that the package group names may differ depending on distribution, but generally, we will need the "development tools" and "C development tools" groups installed.</p>
+<h4 id="listing-package-groups-with-dnf">Listing Package Groups with dnf</h4>
+<pre><code>dnf group list -v
+</code></pre>
+<h4 id="listing-package-groups-with-yum">Listing Package Groups with yum</h4>
+<pre><code>yum grouplist hidden
+</code></pre>
+<h4 id="installing-package-groups-with-dnf">Installing Package Groups with dnf</h4>
+<pre><code>dnf group install "C Development Tools and Libraries"
+dnf group install "Development Tools"
+</code></pre>
+<h4 id="installing-package-groups-with-yum">Installing Package Groups with yum</h4>
+<pre><code>yum groupinstall "Development Tools"
+</code></pre>
+<h4 id="texinfo">Texinfo</h4>
+<p>You may also have to install the "tex info" package to obtain the "make info" binary:</p>
+<pre><code>dnf install texinfo
+</code></pre>
+<h4 id="ms-dos-tools">MS-DOS Tools</h4>
+<p>Our first partition needs to be formatted as FAT12 or FAT16 to enable interoperability with GRUB and EFI. For this reason, you need the "dosfstools" package, or similar, installed on your system.</p>
+<p class="return"><a href="index.html">Back to top</a></p>
+<h3 id="specific-software-packages-and-required-versions">Specific Software Packages and Required Versions</h3>
+<p>The <code>nano</code> editor is used throughout this course; amend commands with your preferred text editor as needed.</p>
+<p>Some of the software packages installed require a specific or minimum version. Most often, the most recent version (with patches) will be sufficient.</p>
+<ul>
+<li>bash (<code>/bin/sh</code> must be a link to the bash binary)</li>
+<li>binutils</li>
+<li>bison (<code>/usr/bin/yacc</code> must be linked to or provided by bison)</li>
+<li>bzip2</li>
+<li>coreutils</li>
+<li>diffutils</li>
+<li>findutils</li>
+<li>gawk (<code>/usr/sbin/awk</code> must be a link to the gawk binary)</li>
+<li>gcc 6.2</li>
+<li>glibc 2.24</li>
+<li>grep</li>
+<li>gzip</li>
+<li>Linux kernel 4.x</li>
+<li>m4</li>
+<li>make</li>
+<li>patch</li>
+<li>perl 5.24</li>
+<li>sed</li>
+<li>tar</li>
+<li>texinfo</li>
+<li>xz</li>
+</ul>
+<h4 id="yacc-and-bison">yacc and Bison</h4>
+<p><strong>IMPORTANT</strong></p>
+<p>Note that Fedora Core 24 installs <code>byacc</code> by default. This means <code>yacc</code> is not a link to the bison executable. You can verify this with the following command:</p>
+<pre><code>rpm -qf `which yacc`
+</code></pre>
+<p>If the <code>yacc</code> binary is installed by the <code>byacc</code> package, execute the following:</p>
+<p>Remove the byacc package:</p>
+<pre><code>dnf erase byacc
+</code></pre>
+<p>Re-install bison</p>
+<pre><code>dnf reinstall bison
+</code></pre>
+<p>Link the bison binary:</p>
+<pre><code>ln -s `which bison` /bin/yacc
+</code></pre>
+<p>Call <code>yacc -V</code> and make certain the output matches <code>bison -V</code>.</p>
+<h4 id="hardwarevirtual-hardware-specifications">Hardware/Virtual Hardware Specifications</h4>
+<h5 id="cpus">CPUs</h5>
+<p>Many of the packages we compile in this course can benefit from parallel make processes. The <code>make</code> command can, in many cases, compile multiple source files simultaneously, provided the build system has more than one CPU.</p>
+<p>It is strongly recommended than you allocate at least two CPUs if your build system is virtualized. If you are using hardware, ideally you will have at least two physical CPU cores to speed up the build process.</p>
+<p>In particular, build and test times for software like GCC can be reduced a great deal by having <code>make</code> execute processes in parallel. In places where you see <code>-j2</code> indicated with the <code>make</code> command, it is perfectly acceptable to substitute a higher number, up to the number of CPUs allocated to the VM (or, if using hardware, the number of physical cores in the system). So, provided you have four CPU cores available, you are welcome to use <code>-j4</code> instead of <code>-j2</code>.</p>
+<h5 id="ram">RAM</h5>
+<p>Virtualized or otherwise, you will need at least two gigabytes of <em>free</em> RAM available. Do not include swap space in this consideration. Builds may fail if swap use becomes extant.</p>
+<h5 id="build-system-disks">Build System Disks</h5>
+<p>In addition to to the system disk, the build system needs an additional block storage device available. We recommend attaching a 20 gigabyte drive to the second port of the SAS or SATA controller of your virtual machine. If using hardware, this device can be a USB drive, a second hard, etc.; however, it must be a local block device physically attached to the system.</p>
+<p class="return"><a href="index.html">Back to top</a></p>
+<h3 id="users-groups-and-more">Users, Groups, and More</h3>
+<h4 id="dont-use-root-unless-needed">Don't Use root Unless Needed</h4>
+<p>The most important rule of this course parallels a general principle in *NIX in general: Do <em>nothing</em> as <em>root</em> unless it is required.</p>
+<p>Particularly, when compiling code, it is very possible to crash your system or damage your installation. It is possible to even damage hardware in many cases. Beyond this, if you compile as <em>root</em>, you may find it next to impossible to work through the various steps of a process using anything but the <em>root</em> account. This sets us up for failure: Forget to set a single environment variable, and you've overwritten critical system libraries or binaries on the build system, only to find no binaries can be executed and the system cannot reboot.</p>
+<p>At some stages of the build process, we must use the <em>root</em> account to execute commands. This will be noted when necessary.</p>
+<p class="return"><a href="index.html">Back to top</a></p>
+<h3 id="creating-our-user">Creating Our User</h3>
+<p>For this course, we create a user and group to execute our builds. Make sure the user is part of <em>wheel</em> group (or equivalent).</p>
+<p>First, add our <em>byol</em> group:</p>
+<pre><code>groupadd byol
+</code></pre>
+<p>Be sure to add the <code>-k</code> flag to the <code>user add</code> command to prevent files being copied to the home directory from <code>/etc/skeleton</code>:</p>
+<pre><code>useradd -s /bin/bash -g byol -m -k /dev/null byol
+</code></pre>
+<p>We do this to prevent environment variables that might otherwise be appropriate for a user account from being set in our build environment, as these can have unintended consequences.</p>
+<h4 id="setting-the-login-environment-for-the-byol-user">Setting the Login Environment for the byol User</h4>
+<p>There should be two bash-related files in the home directory of the <em>byol</em> user: <code>.bash_profile</code> and <code>.bashrc</code>.</p>
+<p>The <code>.bash_profile</code> file needs to have the following content:</p>
+<pre><code>exec env -i HOME=$HOME TERM=$TERM PS1='\u:\w\$ ' /bin/bash
+</code></pre>
+<p>While the <code>.bashrc</code> file needs to have the following content:</p>
+<pre><code>set +h
+umask 022
+LC_ALL=POSIX
+PATH=/tools/bin:/bin:/usr/bin
+export LC_ALL PATH
+</code></pre>
+<p>These files are read during login, and set up the shell environment for the user. We set the environment here specifically to avoid inheriting environment variables that might have an adverse effect on our efforts.</p>
+<p>After altering these files, upon log out and log in, the output from the <code>env</code> command should return output similar to the following:</p>
+<pre><code>TERM=xterm-256color
+LC_ALL=POSIX
+PATH=/tools/bin:/bin:/usr/bin
+PWD=/home/byol
+PS1=\u:\w\$
+SHLVL=1
+HOME=/home/byol
+_=/bin/env
+</code></pre>
+<p class="return"><a href="index.html">Back to top</a></p>
+<h3 id="destination-disk">Destination Disk</h3>
+<p>Once you've configured your virtual machine, add an additional disk to it. 20 gigabytes should be sufficient; the disk type doesn't matter, but attaching to the SAS or SATA controller is recommended. We will refer to this newly attached disk as the "destination disk" from this point forward.</p>
+<h4 id="partitioning-the-destination-disk">Partitioning the Destination Disk</h4>
+<p>By the conclusion of this section, the destination disk partition layout should look like this:</p>
+<pre><code>Number  Start   End     Size    File system     Name     Flags
+ 1      1049kB  105MB   104MB   fat16           primary  bios_grub
+ 2      105MB   551MB   446MB   ext4            primary
+ 3      551MB   19.3GB  18.7GB  ext4            primary
+ 4      19.3GB  21.5GB  2174MB  linux-swap(v1)  primary
+</code></pre>
+<p>The first partition begins at 1MB and extends to 104MB. This partition exists solely for the purposes of booting and is formatted as VFAT. We will refer to this partition as the <em>EFI/GRUB boot</em> partition henceforth.</p>
+<p>The second partition begins at around 100MB and ends 400MB or so later. This is the <em>boot</em> partition.</p>
+<p>The third partition begins at around 550MB and ends around 19GB. This is the <em>root</em> partition.</p>
+<p>This last partition begins around 19MB and extends to the end of the disk. This is the <em>swap</em> parition.</p>
+<p>The following command creates these partitions using <code>parted</code>:</p>
+<pre><code>parted --script /dev/sdb mklabel gpt mkpart primary 1MiB 100MiB mkpart primary 100MiB 525MiB mkpart primary 525MiB 19.3GB mkpart primary 19.3GB  100%
+</code></pre>
+<h5 id="setting-flags-on-the-grub-boot-partition">Setting Flags on the GRUB Boot Partition</h5>
+<p>The GRUB boot partition needs to have certain flags set so that BIOS-based systems can boot from it. We accomplish this using <code>parted</code>:</p>
+<pre><code>parted --script /dev/sdb set 1 bios_grub on
+</code></pre>
+<h4 id="creating-filesystems-on-the-destination-disk">Creating Filesystems on the Destination Disk</h4>
+<p>Our partition table on our destination block storage device should look like this:</p>
+<pre><code>Number  Start   End     Size    File system     Name     Flags
+ 1      1049kB  105MB   104MB   fat16           primary  bios_grub
+ 2      105MB   551MB   446MB   ext4            primary
+ 3      551MB   19.3GB  18.7GB  ext4            primary
+ 4      19.3GB  21.5GB  2174MB  linux-swap(v1)  primary
+</code></pre>
+<h5 id="partition-1">Partition 1</h5>
+<pre><code>mkfs.vfat /dev/sdb1
+</code></pre>
+<h5 id="partitions-2-and-3">Partitions 2 and 3</h5>
+<p>The second and third partitions are our boot and root partitions. We will format these as "vanilla" ext4, using the <code>mkfs.ext4</code> command; note that your device name may be different:</p>
+<pre><code>mkfs.ext4 /dev/sdb2
+mkfs.ext4 /dev/sdb3
+</code></pre>
+<h5 id="partition-4">Partition 4</h5>
+<p>The last partition is our swap partition, which we will initialize using the <code>mkswap</code> command:</p>
+<pre><code>mkswap /dev/sdb4
+</code></pre>
+<h4 id="setting-partition-and-filesystem-metadata">Setting Partition and Filesystem Metadata</h4>
+<p>We're going to set some volume metadata on our filesystems using the <code>tune2fs</code> command.</p>
+<p>Set the volume label of our second partition on our destination device to <em>DESTBOOT</em>:</p>
+<pre><code> tune2fs -c 1 -L DESTBOOT /dev/sdb2
+</code></pre>
+<p>Set the volume label of our third partition to <em>DESTROOT</em>:</p>
+<pre><code>tune2fs -c 1 -L DESTROOT /dev/sdb3
+</code></pre>
+<p>Note that we're setting the mount count to <code>1</code>, which means the consistency of these filesystems will be checked after they have been mounted once. This is optional, but can be helpful in the event you have to reset your VM or build system and the filesystems aren't cleanly unmounted.</p>
+<h4 id="sanity-check">Sanity Check</h4>
+<p>At this point, you should have:</p>
+<ul>
+<li>A complete build system with all of the necessary software installed to build Linux. Ideally, this system has two or more CPUs and two gigabytes or more of <em>free</em> RAM. Do <strong>not</strong> include available swap as free RAM.</li>
+<li>A <em>byol</em> user and group. This user should have access to root privileges via <code>su</code> or <code>sudo</code>.</li>
+<li>A second block storage device mounted on the build system, ideally on the same interface/controller as the system drive. This is our destination drive and should be partitioned and formatted as described above.</li>
+</ul>
+<p>Measure twice, cut once: This is a good time to review all of the sections previous to this one and ensure your build system and destination disk are setup as recommended.</p>
+<h4 id="mount-points">Mount Point(s)</h4>
+<h5 id="destination-device-root-and-boot-directories">Destination Device: Root and Boot Directories</h5>
+<p>We're going to mount our destination disk on <code>/build</code>, as follows, using the superuser account:</p>
+<pre><code>mkdir -v /build
+export BROOT=/build
+mount -t ext4 -L DESTROOT $BROOT
+mkdir -v $BROOT/boot
+mount -t ext4 -L DESTBOOT $BROOT/boot
+</code></pre>
+<h5 id="adding-our-swap-partition">Adding Our Swap Partition</h5>
+<pre><code>swapon -v /dev/sdb4 
+</code></pre>
+<h5 id="exporting-the-broot-environment-variable">Exporting the BROOT Environment Variable</h5>
+<p>We're also going to add an export line to the <code>.bashrc</code> file of the <em>byol</em> account to export the <code>BROOT</code> variable. Our <code>.bashrc</code> file should look like this:</p>
+<pre><code>set +h
+umask 022
+LC_ALL=POSIX
+PATH=/tools/bin:/bin:/usr/bin
+BROOT=/build
+export BROOT LC_ALL PATH
+</code></pre>
+<p class="return"><a href="index.html">Back to top</a></p>
+<h3 id="sanity-check-2">Sanity Check</h3>
+<p>Measure twice, cut once: you should have the root and boot destination filesystems mounted under <code>/build</code>. Also, your swap partition should be active. We can check these with the <code>mount</code> and <code>swapon</code> commands:</p>
+<pre><code>mount | grep 'sdb'
+</code></pre>
+<p>This should return a listing similar to:</p>
+<pre><code>/dev/sdb3 on /build type ext4 (rw,relatime,data=ordered)
+/dev/sdb2 on /build/boot type ext4 (rw,relatime,data=ordered) 
+</code></pre>
+<p><code>swapon | grep sdb</code> should output similar:</p>
+<pre><code>/dev/sdb4 partition   2G   0B   -2
+</code></pre>
+<p>Keep in mind that your device names may be different.</p>
+<p class="return"><a href="index.html">Back to top</a></p>
+<h3 id="building-the-toolchain">Building the Toolchain</h3>
+<p>We're now ready to build the requisite toolchain needed to build Linux from scratch.</p>
+<h4 id="directories-and-directory-permissions">Directories and Directory Permissions</h4>
+<p>First, let's create a directory in our destination root to hold the source files:</p>
+<pre><code>mkdir -v $BROOT/source
+</code></pre>
+<p>We want the <code>/usr/src/toolchain</code> directory to be sticky, which means that only the owner of a file can delete it. We also want the files in this directory to be writable for all users:</p>
+<pre><code>chmod -v 777 $BROOT/source
+</code></pre>
+<p>Additionally, we want to create a directory to contain our compiled tools, which we need to keep aside and apart from the same binaries on the build system:</p>
+<pre><code>mkdir -v $BROOT/tools
+</code></pre>
+<p>We want to link this directory to the build system. The following command looks somewhat strange, but is correct:</p>
+<pre><code>ln -sv $BROOT/tools /
+</code></pre>
+<p>The result should be a symlink from <code>/tools</code> in the build system root directory to the <code>tools</code> directory on the root of our destination device:</p>
+<pre><code>ln -sv $BROOT/tools /
+'/tools' -&gt; '/build/tools'
+</code></pre>
+<h4 id="source-code-files">Source Code Files</h4>
+<p>A list of the software we need to install can be found at:
+<a href="http://linuxfromscratch.org/BROOT/view/stable/wget-list">http://linuxfromscratch.org/BROOT/view/stable/wget-list</a></p>
+<p>We can download all of these files using two <code>wget</code> commands:</p>
+<pre><code>wget http://linuxfromscratch.org/BROOT/view/stable/wget-list
+wget --input-file=wget-list --no-check-certificate --directory-prefix=$BROOT/source 
+</code></pre>
+<p>We do not want the source code files located in our tools directory.</p>
+<h4 id="decompress-and-extract-the-downloaded-files">Decompress and Extract the Downloaded Files</h4>
+<p>All of our source code files will have been compressed with <code>zx</code>, <code>bzip2</code>, or <code>gzip</code>. We can decompress these files by running the following three commands:</p>
+<pre><code>bunzip2 -d \*.bz2
+gunzip \*.gz
+xz -d \*.xz
+</code></pre>
+<h4 id="change-ownership-of-the-build-directory">Change Ownership of the Build Directory</h4>
+<p>Execute:</p>
+<pre><code>chown -v byol:byol $BROOT
+</code></pre>
+<h4 id="patch-files">Patch Files</h4>
+<p>You'll notice that some of the files listed in the above TXT file are patch files. These patches need to be applied to the source before we compile the relevant package; we touch on this where necessary.</p>
+<h4 id="a-word-on-errors">A Word on Errors</h4>
+<p>Both binutils and GCC must compile without errors. If either built has errors, start over. Depending on the error type you encounter this might mean rebuilding just GCC or rebuilding binutils as well.</p>
+<p class="return"><a href="index.html">Back to top</a></p>
+<h3 id="setting-the-target-triplet">Setting the Target Triplet</h3>
+<p>GCC and the rest of the build toolchain use a string called the "target triplet" to provide information as to the current CPU architecture, vendor, and operating system. The triplet itself is broken into three parts: <strong>machine-vender-os</strong></p>
+<p>So We could define our target triplet as follows:</p>
+<pre><code>x86_64-elf
+</code></pre>
+<p>However, we need to build GCC and the binutils toolchain without any external dependencies. To do that, our first build must be targeted for cross-compilation. This will ensure that all of the necessary dependencies are included and none of the shared libraries on the build system are relied upon. So we're going to use the triplet instead of the one above:</p>
+<pre><code>x86_64-BROOT-linux-gnu
+</code></pre>
+<p>This target triplet indicates an x86_64 compatible machine and an elf binary compatible operating system. Since we need this value set in our environment, let's add this to the <code>.bashrc</code> file of the <em>byol</em> user. That file should now look like this:</p>
+<pre><code>set +h
+umask 022
+LC_ALL=POSIX
+PATH=/tools/bin:/bin:/usr/bin
+BROOT=/build
+BTARGET=x86_64-BROOT-linux-gnu
+export BROOT BTARGET LC_ALL PATH   
+</code></pre>
+<p>The vendor field is optional in the target triplet; we've specified "BROOT" here as this vendor code exists to facilitate building for purposes such as ours.</p>
+<p class="return"><a href="index.html">Back to top</a></p>
+<h3 id="target-triplets-whats-the-point">Target Triplets: What's the Point?</h3>
+<p>The purpose of the target triplet is to provide a means for the system and compilers to determine specific information about any given binary. After cross referencing and disambiguation, the target triplet is actually resolved to three distinct values, which may be quite different from the triplet specified above:</p>
+<ul>
+<li><strong>Build Platform</strong> :: Where the binary was built.</li>
+<li><strong>Host Platform</strong> :: Where the binaries are intended to run.</li>
+<li><strong>Target Platform</strong> :: In the case of compilers, this is for what the compiler will generate code.</li>
+</ul>
+<p>So after disambiguation, target triplets are "resolved" into something like this:</p>
+<pre><code>x86_64-elf-gcc
+</code></pre>
+<p>In fact, we could specify this value as our target triplet. This would result, however, in subtle changes in GCC's handling of code, and the outcome may not be desirable. For example, changing the vendor to the value <code>pc</code> will result in the toolchain being cross-compiled with 32-bit compatibility enabled. This, in turn, will result in a different dynamic linker that will be used both at compile and runtime to line and find shared libraries, respectively. If GCC or glibc are configured incorrectly the result is often a toolchain that is broken such that problems do not manifest until the build process is nearly complete.</p>
+<p class="return"><a href="index.html">Back to top</a></p>
+<h3 id="build-directory">Build Directory</h3>
+<p>For many of the builds, we <code>cd</code> into the source directory and create a <code>build</code> directory. Once changed into this directory, we proceed with the build. This is the recommended way to build most of the toolchain, as it keeps the original source files from being tampered with by the build process.</p>
+<p>If a build directory is not specified, it is not necessary and won't be used.</p>
+<h4 id="configuration">Configuration</h4>
+<p>Once in the build directory, the "configure" script is called from the parent directory to determine the options for the tool being built. This also copies the relevant source and configuration files from the original source directory to the build directory created in the previous section.</p>
+<h4 id="deleting-source-directories">Deleting Source Directories</h4>
+<p>For some builds (like GCC and binutils), it is perfectly fine to delete only the <code>build</code> directory after compilation and installation are executed. However, erring on the side of caution, it may be wise to delete the entire source directory to prevent misconfiguration down the road.</p>
+<p class="return"><a href="index.html">Back to top</a></p>
+<h2 id="section-3">Section 3</h2>
+<h3 id="stage-1-building-a-temporary-toolchain">Stage 1: Building a Temporary Toolchain</h3>
+<p>The first stage of the build process entails building a toolchain capable of producing executables for our target platform. Because our target platform differs (in terms of the target triplet) from the platform on which we are building it (the build system), we need to first build a toolchain that is can be used in a "standalone" fashion. The ensures that we avoid any dependency on the build system environment or libraries.</p>
+<p>Note that for Stage 1 builds, we don't execute the test suites for the software packages installed. The reason for this is simple — the dependencies required to run the tests, such as TCL, have not yet been installed, and the tests will likely fail.</p>
+<p>Running the tests ceases to be optional once we reach Stage 3, however.</p>
+<p class="return"><a href="index.html">Back to top</a></p>
+<h3 id="compiling-binutils">Compiling Binutils</h3>
+<h4 id="create-the-build-directory">Create the Build Directory</h4>
+<p>Change into the binutils source directory under <code>$BROOT/source</code>. Create a build directory:</p>
+<pre><code>mkdir -v build &amp;&amp; cd build
+</code></pre>
+<h4 id="configure-the-source">Configure the Source</h4>
+<p>Call the "configure" script from within the build directory to configure binutils. We used the following parameters for configure:</p>
+<pre><code>../configure \
+--prefix=/tools \
+--with-sysroot=$BROOT \
+--with-lib-path=/tools/lib \
+--target=$BTARGET  \
+--disable-nls \
+--disable-werror
+</code></pre>
+<ul>
+<li><code>prefix</code> :: Tells the configure script where the compiled binaries should be installed.</li>
+<li><code>with-sysroot</code> :: Tells the configure script to look in the specified directory for the target system libraries.</li>
+<li><code>with-lib-path</code> :: Specifies which path the linker will be configured to use.</li>
+<li><code>target</code> :: Because the triplet we've defined is slightly different than what will be determined by <code>configure</code> itself, the binutils source needs to be compiled to accommodate cross-linking. This is necessary because we want to ensure a "clean room" build, without any artifacts from the build system.</li>
+<li><code>disable-els</code> :: Disables internationalization, which we don't need at this stage.</li>
+<li><code>disable-werror</code> :: Keeps warnings from interrupting the compile process.</li>
+</ul>
+<h4 id="compile-the-source">Compile the Source</h4>
+<pre><code>make -j2
+</code></pre>
+<h4 id="create-a-library-directory-and-symlink">Create a Library Directory and Symlink</h4>
+<p>We need to create the <code>/tools/lib</code> directory and symlink <code>/tools/lib64</code> to it. This ensures that the proper libraries can be found along both paths:</p>
+<pre><code>case $(uname -m) in
+  x86_64) mkdir -v /tools/lib &amp;&amp; ln -sv lib /tools/lib64 ;;
+esac
+</code></pre>
+<h4 id="install-binutils">Install binutils</h4>
+<pre><code>make install
+</code></pre>
+<h4 id="delete-the-build-directory">Delete the Build Directory</h4>
+<p>Be sure to delete the <code>build</code> directory once you've run <code>make install</code>.</p>
+<p class="return"><a href="index.html">Back to top</a></p>
+<h3 id="gcc">GCC</h3>
+<p>We are now going to build GCC. Because we're building GCC as a cross-compiler, it will not rely on libraries installed on the build system and instead prefers those packaged with it, or which we explicitly tell <code>configure</code> to look for.</p>
+<h4 id="obtain-the-gcc-dependencies">Obtain the GCC Dependencies</h4>
+<p>First, we need to download the GCC dependencies. We can do that using the following commands to copy the relevant software packages into the GCC source directory. Once they're copied, <code>make</code> finds and builds these dependencies automatically. From the GCC source directory, execute:</p>
+<pre><code>tar -xf ../mpfr-3.1.4.tar
+mv -v mpfr-3.1.4 mpfr
+tar -xf ../gmp-6.1.1.tar
+mv -v gmp-6.1.1 gmp
+tar -xf ../mpc-1.0.3.tar
+mv -v mpc-1.0.3 mpc
+</code></pre>
+<p>Note that the software versions may have changed since this guide was written.</p>
+<h4 id="changing-the-default-linker">Changing the Default Linker</h4>
+<p>We need to instruct GCC to use the linker previously installed by our binutils install. The following script (which you should be able to copy and paste to a terminal window) finds the relevant header files and changes the locations where <code>make</code> looks for certain libraries and files. Execute the following in the GCC source code directory:</p>
+<pre><code>for file in \
+ $(find gcc/config -name linux64.h -o -name linux.h -o -name sysv4.h)
+do
+  cp -uv $file{,.orig}
+  sed -e 's@/lib\(64\)\?\(32\)\?/ld@/tools&amp;@g' \
+  -e 's@/usr@/tools@g' $file.orig &gt; $file
+  echo '
+#undef STANDARD_STARTFILE_PREFIX_1
+#undef STANDARD_STARTFILE_PREFIX_2
+#define STANDARD_STARTFILE_PREFIX_1 "/tools/lib/"
+#define STANDARD_STARTFILE_PREFIX_2 ""' &gt;&gt; $file
+  touch $file.orig
+done
+</code></pre>
+<p>Alternatively, you can save this code in a file in GCC source directory and run it by calling that file.</p>
+<p>A more detailed description of what this script does, per the 'Linux From Scratch' online version:</p>
+<blockquote>"If case the above seems hard to follow, let's break it down a bit. First we find all the files under the GCC/config directory that are named either <code>linux.h</code>, <code>linux64.h</code> or <code>sysv4.h</code>. For each file found, we copy it to a file of the same name but with an added suffix of <code>.orig</code>. Then the first <code>sed</code> expression prepends <code>/tools</code> to every instance of <code>/lib/ld</code>, <code>/lib64/ld</code>, or <code>/lib32/ld</code>, while the second one replaces hard-coded instances of <code>/usr</code>. Next, we add our define statements which alter the default startfile prefix to the end of the file. Note that the trailing <code>/</code> in <code>/tools/lib/</code> is required. Finally, we use <code>touch</code> to update the timestamp on the copied files. When used in conjunction with <code>cp -u</code>, this prevents unexpected changes to the original files in case the commands are inadvertently run twice."</blockquote>
+<h4 id="configure">Configure</h4>
+<p>Create the build directory and change into it. Run the <code>configure</code> script with the following arguments:</p>
+<pre><code>../configure                                   \
+--target=$BTARGET                              \
+--prefix=/tools                                \
+--with-glibc-version=2.24                      \
+--with-sysroot=$BROOT                          \
+--with-newlib                                  \
+--without-headers                              \
+--with-local-prefix=/tools                     \
+--with-native-system-header-dir=/tools/include \
+--disable-nls                                  \
+--disable-shared                               \
+--disable-multilib                             \
+--disable-decimal-float                        \
+--disable-threads                              \
+--disable-libatomic                            \
+--disable-libgomp                              \
+--disable-libmpx                               \
+--disable-libquadmath                          \
+--disable-libssp                               \
+--disable-libvtv                               \
+--disable-libstdcxx                            \
+--enable-languages=c,c++ 
+</code></pre>
+<ul>
+<li><code>target</code> :: Tells <code>make</code> to use the target triplet located in our environment variable.</li>
+<li><code>prefix</code> :: Instructs <code>make</code> to use the specified path to prefix relative pathnames.kss</li>
+<li><code>with-glibc-version</code> :: Indicates which version of glibc we're going to target.</li>
+<li><code>with-sysroot</code> :: Specifies the system root and allows us to specify a different root path than that of the currently-running kernel.</li>
+<li><code>with-newlib</code> :: Prevents any code which requires libc from being compiled (because we haven't built libc yet).</li>
+<li><code>without-headers</code> :: If building a full-blown cross-compiler, GCC needs the header files compatible with the target system. This argument instructs <code>configure</code> and <code>make</code> not to look for them, as we don't need them for this stage.</li>
+<li><code>with-local-prefix</code> :: This instructs <code>configure</code> and <code>make</code> to search the specified directory for include files.</li>
+<li><code>with-native-system-header-dir</code> :: This changes the default include path for headers (which is normally <code>/usr/include</code>) to <code>/tools/include</code>. Without this switch, GCC will look in the default location for include files, and that will break our build since our header files are located in <code>/tools/include</code>.</li>
+<li><code>disable-shared</code> :: Advises GCC to avoid performing static linking. This is a good idea simply because it avoids any conflicts that might arise if GCC were built to use shared libraries, as the system linker might attempt to link them with the libraries installed on the build system.</li>
+<li><code>disable-decimal</code> :: This GCC extension is not compatible when building GCC for cross compilation.</li>
+<li><code>disable-float</code> :: See <code>disable-decimal</code>.</li>
+<li><code>disable-threads</code> :: See <code>disable-decimal</code>.</li>
+<li><code>disable-libatomic</code> :: See <code>disable-decimal</code>.</li>
+<li><code>disable-libgomp</code> :: See <code>disable-decimal</code>.</li>
+<li><code>disable-libmpx</code> :: See <code>disable-decimal</code>.</li>
+<li><code>disable-libquadmath</code> :: See <code>disable-decimal</code>.</li>
+<li><code>disable-libssp</code> :: See <code>disable-decimal</code>.</li>
+<li><code>disable-libvtv</code> :: See <code>disable-decimal</code>.</li>
+<li><code>disable-libstdcxx</code> :: See <code>disable-decimal</code>.</li>
+<li><code>disable-multilib</code> :: This functionality isn't supported on the x86_64 platform.</li>
+<li><code>enable-languages</code> :: For this stage, we need GCC to compile only C and C++. This disables the compilation of compilers for other languages.</li>
+</ul>
+<h4 id="make-gcc">Make GCC</h4>
+<pre><code>make -j2
+</code></pre>
+<p>This will take some time.</p>
+<h4 id="install">Install</h4>
+<pre><code>make install
+</code></pre>
+<p>Do not delete the GCC source code directory just yet. Be sure to delete the <code>build</code> directory, however.</p>
+<p class="return"><a href="index.html">Back to top</a></p>
+<h3 id="install-kernel-header-files">Install Kernel Header Files</h3>
+<p>The Linux kernel ships with a set of header files which provide programmers a software interface to the kernel. These are used primarily by libc (or the GNU implementation, glibc).</p>
+<h4 id="extracting-the-kernel-header-files">Extracting the Kernel Header Files</h4>
+<p>Change to the kernel source directory:</p>
+<pre><code>$BROOT/source/linux-4.x
+</code></pre>
+<p>Issue the following command:</p>
+<pre><code>make mrproper
+</code></pre>
+<p>We now call the <code>make</code> command, specifying the header file output path; we do this in two steps because <code>make</code> wipes any files from the destination directory during this step. First, we extract the files:</p>
+<pre><code>make INSTALL_HDR_PATH=dest headers_install
+</code></pre>
+<p>And second, we copy them to the proper location for libc:</p>
+<pre><code>cp -rv dest/include/* /tools/include
+</code></pre>
+<p class="return"><a href="index.html">Back to top</a></p>
+<h3 id="building-glibc">Building glibc</h3>
+<h4 id="configure-2">Configure</h4>
+<p>Run the <code>configure</code> script with the following arguments. Note the exported variables; be sure to unset these when the build process is complete!</p>
+<p>The <code>libc_cv_forced_unwind</code> variable impacts the handling of the <code>—force-unwind</code> configuration parameter. The linker we installed when we compiled <code>binutils</code> is cross-compiled and cannot make use of the <code>—force-unwind</code> option unless glibc is present. This variable disables this test.</p>
+<p>The <code>libc_cv_c_cleanup</code> variables instruct configure to disable the test for this functionality, again for the same reasons given for <code>libc\_cv\_forced\_unwind</code>.</p>
+<p>The commands for the configuration process should look like this:</p>
+<pre><code>export libc_cv_forced_unwind=yes
+export libc_cv_c_cleanup=yes
+../configure                         \
+  --prefix=/tools                    \
+  --host=$BTARGET                    \
+  --build=$(../scripts/config.guess) \
+  --enable-kernel=2.6.32             \
+  --with-headers=/tools/include
+</code></pre>
+<ul>
+<li><code>prefix</code> :: Instructs <code>make</code> to use the specified path to prefix's relative pathnames.</li>
+<li><code>host</code> :: Tells <code>make</code> to use the target triplet located in our environment variable.</li>
+<li><code>build</code> :: Combined with the host flag, this instructs glibc's build system to configure itself to cross compile, using the cross-linker and compiler in <code>/tools</code>.</li>
+<li><code>enable-kernel</code> :: Instructs glibc to use workarounds for this specific version (and later) of the kernel.</li>
+<li><code>with-headers</code> :: Specifies the location of header files, so libc knows what features the kernel has and can configure itself accordingly.</li>
+</ul>
+<h4 id="make">Make</h4>
+<p>According to the Linux From Scratch website, glibc sometimes breaks during parallel makes. We're going to disable parallel compilation for glibc by executing make as follows:</p>
+<pre><code>make -j1
+make -j1 install
+</code></pre>
+<h4 id="delete-the-build-directory-2">Delete the Build Directory</h4>
+<p>Be sure to delete the <code>build</code> directory once you've run <code>make install</code>. Additionally, unset the environment variables defined during our configuration:</p>
+<pre><code>unset libc_cv_forced_unwind
+unset libc_cv_c_cleanup
+</code></pre>
+<p class="return"><a href="index.html">Back to top</a></p>
+<h3 id="sanity-check-3">Sanity Check</h3>
+<p>At this point, it is imperative that we stop and check our temporary toolchain to ensure that it has been built correctly. The online version of the "Linux From Scratch" website provides us a neat and sure method of testing that our toolchain is installed correctly.</p>
+<h4 id="testing-the-toolchain">Testing the Toolchain</h4>
+<p>We can test the temporary toolchain to check it compiles and links code and object code correctly with the following commands:</p>
+<pre><code>echo 'int main(){}' &gt; dummy.c
+$BTARGET-gcc dummy.c
+readelf -l a.out | grep ': /tools'
+</code></pre>
+<p>Note that this should be done as the <em>byol</em> user.</p>
+<p>If everything is working as it should be, the <code>grep</code> command should return this output:</p>
+<pre><code>[Requesting program interpreter: /tools/lib64/ld-linux-x86-64.so.2]
+</code></pre>
+<p>If the output is different — particularly if the program interpreter is located on the build system's filesystem hierarchy (<code>lib/ld-linux-x86-64.so.2</code>, etc.) - then something has gone wrong.</p>
+<p>Delete the build directories, check environment variables and start over. Continuing will result in a toolchain that is broken in odd ways which are not immediately apparent.</p>
+<p>Be sure to delete all of the <code>dummy.*</code> files when you're done testing.</p>
+<p class="return"><a href="index.html">Back to top</a></p>
+<h3 id="building-libstdc">Building libstdc++</h3>
+<h4>libstdc++ is Part of GCC</h4>
+<p>This software is part of the GCC sources, so we'll need to be in the <code>gcc</code> source directory, in an empty <code>build</code> directory, before executing the following.</p>
+<h4>Configure</h4>
+<p>Create the <code>build</code> directory as per usual, and run the <code>configure</code> script with the following arguments:</p>
+<pre></code>../libstdc++-v3/configure       \
+--host=$BTARGET                 \
+--prefix=/tools                 \
+--disable-multilib              \
+--disable-nls                   \
+--disable-libstdcxx-threads     \
+--disable-libstdcxx-pch         \
+--with-gxx-include-dir=/tools/$BTARGET/include/c++/6.2.0</code></pre>
+<h4>Make</h4>
+<pre><code>make -j2
+make install</code></pre>
+<p class="return"><a href="index.html">Back to top</a></p>
+<h2 id="section-4">Section 4</h2>
+<h3 id="stage-2-building-with-the-temporary-toolchain">Stage 2: Building with The Temporary Toolchain</h3>
+<p>At this point, we've created a temporary toolchain capable of compiling and linking executables in a stand-alone sense. Now we need to make an additional compilation pass over these same tools so they are native to our target triplet.</p>
+<p>In a sense, Stage 2 creates a "temporary" system, using minimal installations of several familiar programs and libraries like ncurses, bash, and more.</p>
+<p class="return"><a href="index.html">Back to top</a></p>
+<h3 id="compiling-binutils-native-build">Compiling Binutils - Native Build</h3>
+<h4 id="create-the-build-directory-2">Create the Build Directory</h4>
+<p>Change into the binutils source directory under <code>$BROOT/source</code>. Create a build directory:</p>
+<pre><code>mkdir -v build &amp;&amp; cd build
+</code></pre>
+<h4 id="configure-the-source-2">Configure the Source</h4>
+<p>Because we want a native build of binutils, call the target-triplet-specific utilities installed in our first build of binutils:</p>
+<pre><code>export CC=$BTARGET-gcc       
+export AR=$BTARGET-ar                 
+export RANLIB=$BTARGET-ranlib         
+</code></pre>
+<p>Call the "configure" script <em>from within the build directory</em> to configure binutils. We used the following parameters for configure:</p>
+<pre><code>../configure                   \
+--prefix=/tools            \
+--disable-nls              \
+--disable-werror           \
+--with-lib-path=/tools/lib \
+--with-sysroot
+</code></pre>
+<ul>
+<li><code>with-sysroot</code> :: Specifying no value here enables the linker to find shared libraries required by other objects. Without this flag, <code>make</code> may not be able to locate and link some required libraries.</li>
+<li><code>with-lib-path</code> :: Here we're instructing <code>make</code> to use the specified directory explicitly.</li>
+</ul>
+<h4 id="compile-the-source-2">Compile the Source</h4>
+<pre><code>make -j2
+</code></pre>
+<h4 id="install-binutils-2">Install binutils</h4>
+<pre><code>make install
+</code></pre>
+<h4 id="prepare-the-linker-for-upcoming-adjustments">Prepare the Linker for Upcoming Adjustments</h4>
+<p>The following commands clean out the build directory for the <code>ld</code> utility, and then rebuilds the same. We specify the <code>LIB_PATH</code> to override the default value used by the temporary toolchain — this is the default library search path.</p>
+<pre><code>make -C ld clean
+make -C ld LIB_PATH=/usr/lib:/lib
+cp -v ld/ld-new /tools/bin
+</code></pre>
+<p class="return"><a href="index.html">Back to top</a></p>
+<h3 id="building-gcc-natively">Building GCC Natively</h3>
+<h4 id="replacing-the-internal-gcc-limitsh-header">Replacing the Internal GCC limits.h Header</h4>
+<p>GCC initially uses a self-provided <code>limits.h</code> file for the building of the temporary toolchain. Now, we want GCC to use a full set of definitions written in the limits headers. To ensure this, we concatenate several of GCC's internal files to create a single <code>limits.h</code> file:</p>
+<pre><code>cat gcc/limitx.h gcc/glimits.h gcc/limity.h &gt; dirname $($BTARGET-gcc -print-libgcc-file-name)/include-fixed/limits.h
+</code></pre>
+<h4 id="changing-the-default-linker-again">Changing the Default Linker (Again)</h4>
+<p>Once again, we want GCC to use the linker installed in our <code>/tools</code> directory:</p>
+<pre><code>for file in \
+ $(find gcc/config -name linux64.h -o -name linux.h -o -name sysv4.h)
+do
+  cp -uv $file{,.orig}
+  sed -e 's@/lib\(64\)\?\(32\)\?/ld@/tools&amp;@g' \
+  -e 's@/usr@/tools@g' $file.orig &gt; $file
+  echo '
+undef STANDARD_STARTFILE_PREFIX_1
+undef STANDARD_STARTFILE_PREFIX_2
+define STANDARD_STARTFILE_PREFIX_1 "/tools/lib/"
+define STANDARD_STARTFILE_PREFIX_2 ""' &gt;&gt; $file
+  touch $file.orig
+done
+</code></pre>
+<h4 id="gcc-dependencies">GCC Dependencies</h4>
+<p>These should already be in place, as this step was required for the Stage 1 build of GCC. However, if for some reason you've deleted the GCC source directory, re-trace the steps for installing the GCC dependencies as described previously.</p>
+<h4 id="configure-3">Configure</h4>
+<p>Create the build directory and change into it. As with the build of binutils in the previous section, we define some environment variables before compiling:</p>
+<pre><code>export CC=$BTARGET-gcc                                    \
+export CXX=$BTARGET-g++                                   \
+export AR=$BTARGET-ar                                     \
+export RANLIB=$BTARGET-ranlib                             \
+</code></pre>
+<p>Run the <code>configure</code> script with the following arguments:</p>
+<pre><code>../configure                                       \
+--prefix=/tools                                \
+--with-local-prefix=/tools                     \
+--with-native-system-header-dir=/tools/include \
+--enable-languages=c,c++                       \
+--disable-libstdcxx-pch                        \
+--disable-multilib                             \
+--disable-bootstrap                            \
+--disable-libgomp
+</code></pre>
+<h4 id="build-gcc">Build GCC</h4>
+<p>Execute:</p>
+<pre><code>make -j2
+make install 
+</code></pre>
+<h4 id="create-the-cc-symlink">Create the cc Symlink</h4>
+<p>Typically, scripts call <code>cc</code> instead cf <code>gcc</code> or <code>clang</code> to compile code. This allows developers to use different compilers without having to re-edit scripts or write scripts for each compile. The behavior is accomplished by creating a symlink to the compiler executable; in our case, <code>cc</code> should be a link to the <code>gcc</code> binary:</p>
+<pre><code>ln -sv gcc /tools/bin/cc
+</code></pre>
+<h4 id="cleanup">Cleanup</h4>
+<p>Be sure to unset the exported variables above. You may also logout and log back in as the <em>byol</em> user to reset the environment.</p>
+<p class="return"><a href="index.html">Back to top</a></p>
+<h3 id="sanity-check-4">Sanity Check</h3>
+<p>Once again, we need to stop and double-check our toolchain to make sure that it can compile and link executables properly.</p>
+<p>Execute the following commands:</p>
+<pre><code>echo 'int main(){}' &gt; dummy.c
+$BTARGET-gcc dummy.c
+readelf -l a.out | grep ': /tools'
+</code></pre>
+<p>Note that this should be done as the <em>byol</em> user.</p>
+<p>If everything is working as it should be, the <code>grep</code> command should return this output:</p>
+<pre><code>[Requesting program interpreter: /tools/lib64/ld-linux-x86-64.so.2]
+</code></pre>
+<p>If the output is different — particularly if the program interpreter is located on the build system's filesystem hierarchy (<code>lib/ld-linux-x86-64.so.2</code>, etc.), then something has gone wrong.</p>
+<p>Return to the last sanity check and re-trace your steps. Continuing will result in a broken toolchain that will likely not compile or link correctly.</p>
+<p class="return"><a href="index.html">Back to top</a></p>
+<h3 id="test-suite-dependencies">Test Suite Dependencies</h3>
+<p>The test suite used for our toolchain requires a handful of dependencies. During the first and second compilation passes of binutils GCC, and Glibc, we didn't allow <code>make</code> to execute tests — as the necessary programs were missing, there was no point in doing so.</p>
+<p>At this stage, however, we most certainly do want to run the tests to make sure our toolchain is set up properly.</p>
+<p>We downloaded the source code for the programs used in testing during Stage 1. Now we need to compile and install them. Unless it is otherwise noted, you'll need to extract the source code directories from the appropriate tar file in <code>/sources</code>, <code>cd</code> into it and execute the <code>configure</code> and <code>make</code> commands. It is assumed from this point forward that you have extracted the source and are in the resulting directory. Note that most of these utilities do not require the use or creation of a separate 'build' directory.</p>
+<h4 id="regarding-make-and-make-install">Regarding make and make install</h4>
+<p>These commands can typically run one after another.</p>
+<pre><code>make &amp;&amp; make install
+</code></pre>
+<p>Sometimes, however, there is good reason to separate the commands into two steps, such as when header files or libraries need to be modified before being installed. Where you see the two commands one after another (as in the following example):</p>
+<pre><code>make
+make install
+</code></pre>
+<p>You can replace the two commands with a single line:</p>
+<pre><code>make &amp;&amp; make install
+</code></pre>
+<p><em>Be careful</em>, though, to use this only where the <code>make</code> and <code>make install</code> commands are one after the other, and no additional steps are required.</p>
+<h4 id="tcl">TCL</h4>
+<h5 id="configure-4">Configure:</h5>
+<pre><code>cd unix
+./configure --prefix=/tools
+</code></pre>
+<h5 id="compile">Compile:</h5>
+<pre><code>make -j2
+</code></pre>
+<h5 id="install-2">Install:</h5>
+<pre><code>make install
+</code></pre>
+<h5 id="change-permissions">Change Permissions</h5>
+<p><code>chmod</code> the installed library file so we can strip out debugging symbols later:</p>
+<pre><code>chmod -v u+w /tools/lib/libtcl8.6.so
+</code></pre>
+<h5 id="install-headers">Install Headers</h5>
+<pre><code>make install-private-headers
+</code></pre>
+<h5 id="create-required-symlink">Create Required Symlink</h5>
+<p>Be sure to replace the <code>xxx</code> with the appropriate minor version of TCL in the following command:</p>
+<pre><code>ln -sv tclsh8.xxx /tools/bin/tclsh
+</code></pre>
+<h4 id="expect">Expect</h4>
+<p>First, we want to force <code>expect</code> to use <code>/bin/stty</code> to open a terminal as opposed to <code>/usr/local/bin/stty</code>; the binary in <code>/usr/local</code> is located on the build system (as we don't have a <code>/usr/local</code> hierarchy on our destination disk). We don't want <code>expect</code> to depend on that binary.</p>
+<p>To remedy this, execute:</p>
+<pre><code>cp -v configure{,.orig}
+sed 's:/usr/local/bin:/bin:' configure.orig &gt; configure
+</code></pre>
+<p>This uses <code>sed</code> to replace the path used by the <code>configure</code> script.</p>
+<h5 id="configure-5">Configure</h5>
+<pre><code>./configure --prefix=/tools --with-tcl=/tools/lib --with-tclinclude=/tools/include
+</code></pre>
+<h5 id="install-3">Install</h5>
+<p>We include the <code>SCRIPTS</code> variable so <code>make</code> will skip including supplemental scripts.</p>
+<pre><code>make SCRIPTS="" install
+</code></pre>
+<h4 id="dejagnu">DejaGNU</h4>
+<h5 id="configure-6">Configure</h5>
+<pre><code>./configure --prefix=/tools
+</code></pre>
+<h5 id="compile-and-install">Compile and Install</h5>
+<pre><code>make install
+</code></pre>
+<h4 id="check">Check</h4>
+<h5 id="configure-7">Configure</h5>
+<p>We include an empty <code>PKG_CONFIG</code> variable here to prevent any pre-defined pkg-config options that may lead <code>make</code> to link against libraries on the build system.</p>
+<pre><code>PKG_CONFIG= ./configure --prefix=/tools
+</code></pre>
+<h5 id="compile-and-install-2">Compile and Install</h5>
+<pre><code>make
+make install
+</code></pre>
+<h4 id="ncurses">Ncurses</h4>
+<p>Ncurses is a library which provides terminal control routines. It allows for a basic graphical user interface to be used in text-only (e.g., terminal or console) environments.</p>
+<h5 id="configure-8">Configure</h5>
+<p>We amend the source code here to ensure that the <code>gawk</code> command is found before <code>awk</code>:</p>
+<pre><code>sed -i s/mawk// configure
+./configure --prefix=/tools \
+            --with-shared   \
+            --without-debug \
+            --without-ada   \
+            --enable-widec  \
+            --enable-overwrite
+</code></pre>
+<h5 id="compile-and-install-3">Compile and Install</h5>
+<pre><code>make
+make install
+</code></pre>
+<h4 id="bash">Bash</h4>
+<h5 id="configure-9">Configure</h5>
+<pre><code>./configure --prefix=/tools --without-bash-malloc
+</code></pre>
+<p>We pass the <code>—without-bash-malloc</code> parameter to disable bash's internal <code>malloc()</code>, which is known to be somewhat buggy.</p>
+<h5 id="compile-and-install-4">Compile and Install</h5>
+<pre><code>make
+make install
+</code></pre>
+<h5 id="symlink-sh">Symlink sh</h5>
+<p>In many distributions, the <code>sh</code> command is actually a symlink to the bash executable; ours is no different. Create the symlink with the following command:</p>
+<pre><code>ln -sv bash /tools/bin/sh
+</code></pre>
+<h4 id="bzip">bzip</h4>
+<p>The <code>bzip</code> package does not use a configure script, only <code>make</code>.</p>
+<h5 id="compile-2">Compile</h5>
+<pre><code>make
+</code></pre>
+<h5 id="install-4">Install</h5>
+<p>We pass the <code>PREFIX</code> variable here to ensure the resulting binaries are installed in the <code>/tools</code> hierarchy.</p>
+<pre><code>make PREFIX=/tools install
+</code></pre>
+<h4 id="coreutils">Coreutils</h4>
+<p>The <code>coreutils</code> package provides many of the basic user-land utilities we use in the shell to manipulate text, files and the environment.</p>
+<h5 id="configure-10">Configure</h5>
+<p>Notice the <code>--enable-install-program</code> parameter. We pass this to <code>configure</code> to build the 'hostname' program, which is disabled by default.</p>
+<pre><code>./configure --prefix=/tools --enable-install-program=hostname
+</code></pre>
+<h5 id="compile-and-install-5">Compile and Install</h5>
+<pre><code>make
+make install
+</code></pre>
+<h4 id="diffutils-file-findutils-and-gawk">Diffutils, File, Findutils, and Gawk</h4>
+<p>These software packages use identical configuration and compilation/install steps. Execute these steps for each of these packages — be sure not to skip any.</p>
+<h5 id="configure-11">Configure</h5>
+<pre><code>./configure --prefix=/tools
+</code></pre>
+<h5 id="compile-and-install-6">Compile and Install</h5>
+<pre><code>make
+make install
+</code></pre>
+<h4 id="gettext">Gettext</h4>
+<p>We only need three programs from the <code>gettext</code> package at this point: <code>msgfmt</code>, <code>msgmerge</code> and <code>xgettext</code>; hence the unusual <code>make</code> commands.</p>
+<h5 id="configure-12">Configure</h5>
+<p>Note that we pass an empty "EMACS" variable to <code>configure</code>; this prevents the detection of Lisp scripts used by emacs, which is known to hang some systems. Be certain to <code>cd</code> into the <code>gettext-tools</code> directory before running <code>configure</code>.</p>
+<pre><code>cd gettext-tools
+EMACS="no" ./configure --prefix=/tools --disable-shared
+</code></pre>
+<h5 id="compile-the-binaries">Compile the Binaries</h5>
+<pre><code>make -C gnulib-lib
+make -C intl pluralx.c
+make -C src msgfmt
+make -C src msgmerge
+make -C src xgettext
+</code></pre>
+<h5 id="install-5">Install</h5>
+<p>Rather than using <code>make</code> to install our binaries for us, we copy them into place manually:</p>
+<pre><code>cp -v src/{msgfmt,msgmerge,xgettext} /tools/bin
+</code></pre>
+<h4 id="grep-gzip-and-m4">Grep, Gzip, and M4</h4>
+<p>These software packages use identical configuration and compilation/install steps. Execute these steps for each of these packages — be sure not to skip any.</p>
+<h5 id="configure-13">Configure</h5>
+<pre><code>./configure --prefix=/tools
+</code></pre>
+<h5 id="compile-and-install-7">Compile and Install</h5>
+<pre><code>make
+make install
+</code></pre>
+<h4 id="make-2">Make</h4>
+<h5 id="configure-14">Configure</h5>
+<p>Here we pass the <code>—without-guile</code> flag to <code>configure</code>. While these libraries may be available on the build system, they are not on our destination, and we don't want make to depend on them for that reason.</p>
+<pre><code>./configure --prefix=/tools --without-guile
+</code></pre>
+<h5 id="compile-and-install-8">Compile and Install</h5>
+<pre><code>make
+make install
+</code></pre>
+<h4 id="patch">Patch</h4>
+<h5 id="configure-15">Configure</h5>
+<pre><code>./configure --prefix=/tools
+</code></pre>
+<h5 id="compile-and-install-9">Compile and Install</h5>
+<pre><code>make
+make install
+</code></pre>
+<h4 id="perl-5">Perl 5</h4>
+<h5 id="configure-16">Configure</h5>
+<p>The Perl source code doesn't use the standard <code>configure</code> script. Note the capital <code>C</code> in the configuration command:</p>
+<pre><code>sh Configure -des -Dprefix=/tools -Dlibs=-lm
+</code></pre>
+<h5 id="compile-3">Compile</h5>
+<pre><code>make
+</code></pre>
+<h5 id="install-6">Install</h5>
+<p>We only need a few of the libraries we've built, so we'll copy these to our destination manually:</p>
+<pre><code>cp -v perl cpan/podlators/scripts/pod2man /tools/bin
+mkdir -pv /tools/lib/perl5/5.24.0
+cp -Rv lib/* /tools/lib/perl5/5.24.0
+</code></pre>
+<h4 id="sed-tar-and-texinfo">sed, tar, and texinfo</h4>
+<h5 id="configure-17">Configure</h5>
+<pre><code>./configure --prefix=/tools
+</code></pre>
+<h5 id="compile-and-install-10">Compile and Install</h5>
+<pre><code>make
+make install
+</code></pre>
+<h4 id="util-linux">Util-linux</h4>
+<h5 id="configure-18">Configure</h5>
+<p>We include an empty <code>PKG_CONFIG</code> variable here to prevent any pre-defined <code>pkg-config</code> options that may lead <code>make</code> to link against libraries on the build system.</p>
+<pre><code>./configure --prefix=/tools                \
+            --without-python               \
+            --disable-makeinstall-chown    \
+            --without-systemdsystemunitdir \
+            PKG_CONFIG=""
+</code></pre>
+<ul>
+<li><code>without-python</code> :: This disables the Python bindings, which we don't need at this point.</li>
+<li><code>disable-makeinstall-chown</code> :: <code>make</code> tries to change the owner of the binaries after copying them into place. This requires root permissions, however, so we disable this.</li>
+<li><code>without-systemdsystemunitdir</code> :: This instructs <code>make</code> to skip the installation of systemd-specific files.</li>
+</ul>
+<h5 id="compile-and-install-11">Compile and Install</h5>
+<pre><code>make
+make install
+</code></pre>
+<h4 id="xz">xz</h4>
+<h5 id="configure-19">Configure</h5>
+<pre><code>./configure --prefix=/tools
+</code></pre>
+<h5 id="compile-and-install-12">Compile and Install</h5>
+<pre><code>make
+make install
+</code></pre>
+<p class="return"><a href="index.html">Back to top</a></p>
+<h3 id="stripping-optional">Stripping (Optional)</h3>
+<p>Now that we've got a temporary system built and installed, we can save some space by removing the debug symbols from our binaries and our libraries.</p>
+<p>This command will result in quit a "File format not recognized" warning messages. This is normal — if you examine the file indicated in the message, you can note that the file in question is usually a script file, not a binary.</p>
+<p>Please be <em>very</em> careful with this step. It is very easy to strip the wrong files and delete most of the libraries we've just built and installed.</p>
+<p>THIS STEP IS OPTIONAL.</p>
+<h4 id="strip-the-debug-symbols-from-our-libraries">Strip the Debug Symbols from Our Libraries</h4>
+<pre><code>strip --strip-debug /tools/lib/*
+</code></pre>
+<h4 id="strip-the-debug-symbols-from-our-binaries">Strip the Debug Symbols from Our Binaries</h4>
+<p><em>DO NOT</em> run this command against library files! This command uses the build system's strip binary to remove unneeded symbols. Running this against library files deletes them.</p>
+<pre><code>/usr/bin/strip --strip-unneeded /tools/{,s}bin/*
+</code></pre>
+<p class="return"><a href="index.html">Back to top</a></p>
+<h3 id="switching-to-root">Switching to Root</h3>
+<p>At this point, we've used the <em>byol</em> user for almost every activity, save the creation and mounting of our destination file system.</p>
+<p>From this point forward, however, we will undertake all commands as <em>root</em>.</p>
+<h4 id="environment-check">Environment Check</h4>
+<p>Execute <code>su</code> and run:</p>
+<pre><code>env | grep ^B 
+</code></pre>
+<p>Your output should look something like this:</p>
+<pre><code>BROOT=/build
+BTARGET=x86_64-BROOT-linux-gnu
+</code></pre>
+<p>While the "BROOT" environment variable is <em>required</em>, the "BTARGET" variable is not, and must <em>not</em> be set as we continue forward.</p>
+<h4 id="unsetting-the-btarget-environment-variable">Unsetting the BTARGET Environment Variable</h4>
+<p>Unset this variable with the following command:</p>
+<pre><code>unset BTARGET
+</code></pre>
+<p>Check again to make sure that the variable has been unset:</p>
+<pre><code>env | grep ^B
+</code></pre>
+<p>"BTARGET" should not be anywhere in the output.</p>
+<h4 id="setting-the-broot-environment-variables">Setting the BROOT Environment Variables</h4>
+<p>If you're missing "BROOT", you can set it easily enough:</p>
+<pre><code>export BROOT="/build"
+</code></pre>
+<p class="return"><a href="index.html">Back to top</a></p>
+<h3 id="changing-file-ownership">Changing File Ownership</h3>
+<p>Now that we've installed our binaries and libraries, we need to change their ownership.</p>
+<p>We've built and installed our binaries and libraries using the <em>byol</em> user so far. Our destination system, however, does not have any users defined. This poses a minor security risk — a user could be created with a user ID identical to that of the <em>byol</em> user on the build system, which would then have access to all our binaries.</p>
+<p>The simplest way to restrict access is to make <em>root</em> the owner of these files, as the superuser ID is identical across all systems:</p>
+<pre><code>chown -R root:root $BROOT/tools
+</code></pre>
+<p>If we examine these files, we should see that both user and group are set to <em>root</em>:</p>
+<pre><code>root:~# ls -la $BROOT/tools
+total 68
+drwxr-xr-x 13 root root  4096 Nov 30 18:20 .
+drwxr-xr-x  7 byol byol  4096 Nov 29 00:57 ..
+drwxr-xr-x  2 root root 12288 Nov 30 19:31 bin
+drwxr-xr-x  2 root root  4096 Nov 30 17:25 etc
+drwxr-xr-x 40 root root  4096 Nov 30 19:26 include
+drwxr-xr-x 11 root root 12288 Nov 30 19:30 lib
+lrwxrwxrwx  1 root root     3 Nov 30 17:00 lib64 -&gt; lib
+drwxr-xr-x  6 root root  4096 Nov 30 19:16 libexec
+drwxr-xr-x  5 root root  4096 Nov 30 18:20 man
+drwxr-xr-x  2 root root  4096 Nov 30 19:31 sbin
+drwxr-xr-x 16 root root  4096 Nov 30 19:25 share
+drwxr-xr-x  3 root root  4096 Nov 30 17:25 var
+drwxr-xr-x  5 root root  4096 Nov 30 17:29 x86_64-BROOT-linux-gnu
+drwxr-xr-x  4 root root  4096 Nov 30 17:50 x86_64-pc-linux-gnu
+</code></pre>
+<p class="return"><a href="index.html">Back to top</a></p>
+<h3 id="backing-up">Backing Up</h3>
+<p>Now that we've got a complete (albeit temporary) system, it would be wise to backup our work. If you're using a virtual machine, exporting the VM as an OVA file is one way of ensuring you've got a patent backup.</p>
+<p>You may choose to <code>tar</code> the <code>/build</code> directory — whatever works. The point is that you'll be able to restore the environment to the state it is in now with minimal effort at some point in the future.</p>
+<p>This is important, particularly as a time-saver: Everything we do from this point will alter the binaries and libraries we've built and installed, so there is a possibility things will break irreparably.</p>
+<p><em>BE SURE TO DOUBLE CHECK YOUR ENVIRONMENT AS PER "Switching to Root" BEFORE CONTINUING.</em></p>
+<p class="return"><a href="index.html">Back to top</a></p>
+<h2 id="section-5">Section 5</h2>
+<h3 id="stage-3-native-full-system-build">Stage 3: Native (Full) System Build</h3>
+<p>Up to this point, we've used the <em>byol</em> user to build and install software, with a few notable exceptions. <em>Be sure to check your environment as noted in "Switching to Root" in the previous section.</em></p>
+<p>From this point forward, everything we do will be as the <em>root</em> user. After creating our virtual and pseudo filesystems, we'll make use of the <code>chroot</code> command to set up a working environment for our <em>destination</em> system.</p>
+<p>To protect our build system, and to enable the use of virtual and pseudo filesystems on our destination, we undertake much of the Stage 3 process in a 'chroot jail.'</p>
+<h4>A Note Regarding Package Builds</h4>
+<p>After the  nal GCC compile pass, it is necessary to compile software packages using fresh source  les. This is to prevent any previous con guration from breaking the build. We strongly recommend you re-extract source code from the appropriate tar  le before building and installing any of the userland binaries.</p>
+<p>The packages are compiled and installed in the order given to ensure that all dependencies are met. They must, therefore, be installed in the order speci ed.</p>
+<p class="return"><a href="index.html">Back to top</a></p>
+<h3 id="required-directories-and-devices">Required Directories and Devices</h3>
+<h4 id="directories">Directories</h4>
+<p>We need to create some directories before mounting filesystems:</p>
+<pre><code>mkdir -pv $BROOT/{dev,proc,sys,run}
+</code></pre>
+<p>The output from this command should look like this:</p>
+<pre><code>mkdir: created directory '/build/dev'
+mkdir: created directory '/build/proc'
+mkdir: created directory '/build/sys'
+mkdir: created directory '/build/run'
+</code></pre>
+<h4 id="device-nodes">Device Nodes</h4>
+<p>In addition to the directories required for a fully-functioning system, we need to create some device nodes. These are expected to exist by the kernel and many programs. Execute:</p>
+<pre><code>mknod -m 600 $BROOT/dev/console c 5 1
+mknod -m 666 $BROOT/dev/null c 1 3
+</code></pre>
+<p class="return"><a href="index.html">Back to top</a></p>
+<h3 id="mounting-device-pseudo-and-virtual-filesystems">Mounting Device, Pseudo, and Virtual Filesystems</h3>
+<p>The kernel and many user-land programs expect these filesystems to be mounted; <code>vmstat</code> is one such example.</p>
+<h4 id="mounting-the-dev-filesystem">Mounting the dev Filesystem</h4>
+<p>To populate the <code>dev</code> filesystem, we first need to mount it. We do so by using a "bind" mount, which mounts <code>$BROOT/dev</code> on to the <code>/dev</code> mount of our build system. The result is that <code>$BROOT/dev</code> and <code>/dev</code> will be mounted to the same node, and display the same information.</p>
+<p>Normally, the <code>dev</code> filesystem would be populated by <code>dev</code> at boot. However, since we haven't installed the <code>udev</code> package, and since we haven't booted our destination system, we need to populate this filesystem manually.</p>
+<p>Execute the following to bind <code>$BROOT/dev</code> to <code>/dev</code>:</p>
+<pre><code>mount -v --bind /dev $BROOT/dev
+</code></pre>
+<h4 id="mounting-other-pseudo-and-virtual-filesystems">Mounting Other Pseudo and Virtual Filesystems</h4>
+<p>The <code>gid</code> parameter below ensures that the mount is owned by the group whose ID is <em>5</em>; we later assign this ID to the 'tty' group when we create our <code>/etc/groups</code> file. The 'mode' parameter sets the file mode (permissions) for the device in question.</p>
+<pre><code>mount -vt devpts devpts $BROOT/dev/pts -o gid=5,mode=620
+mount -vt proc proc $BROOT/proc
+mount -vt sysfs sysfs $BROOT/sys
+mount -vt tmpfs tmpfs $BROOT/run
+</code></pre>
+<h4 id="the-special-case-of-devshm">The Special Case of dev/shm</h4>
+<p>Some distributions link <code>/dev/shm</code> to <code>/run/shm</code>. Since we've created the "run" filesystem above, we only need to create the directory:</p>
+<pre><code>if [ -h $BROOT/dev/shm ]; then
+   mkdir -pv $BROOT/$(readlink $BROOT/dev/shm)
+fi
+</code></pre>
+<p class="return"><a href="index.html">Back to top</a></p>
+<h3 id="entering-the-chroot-jail">Entering the chroot jail</h3>
+<p>We're now ready to enter the jail and continue the final build of our distribution.</p>
+<p><em>IF YOU REBOOT, YOU MUST RE-POPULATE <code>/dev</code> AND RE-MOUNT THE PSEUDO/VIRTUAL FILESYSTEMS AS NOTED IN THE PREVIOUS SECTION.</em></p>
+<h4 id="caveats">Caveats</h4>
+<p>The jail provides limited functionality — we've only installed the most basic of tools. At this stage, the goals are to simulate a running destination system and protect the build system from damage. This is why environment variables and filesystem mounts are so important.</p>
+<h4 id="entering-the-jail">Entering the Jail</h4>
+<p>You must be logged in as the superuser to execute the <code>chroot</code> command. Note that we specify the <code>$BROOT</code> for bash, which will adopt this location as the root directory of the jail. The "HOME", "TERM", "PATH" and prompt environment variables are passed in to set up our environment inside the jail. Other parameters are explained below:</p>
+<pre><code>chroot "$BROOT" /tools/bin/env -i HOME=/root TERM="$TERM" PS1='\u:\w\$ ' PATH=/bin:/usr/bin:/sbin:/usr/sbin:/tools/bin /tools/bin/bash --login +h
+</code></pre>
+<ul>
+<li><code>-i</code> :: Instructs <code>env</code> to clear all environment variables upon entering the jail.</li>
+<li><code>--login</code> :: Notifies bash to provide an interactive login.</li>
+<li><code>+h</code> :: Disables path-having by bash. This is important; note that the <code>/tools/bin</code> directory (where we've installed many of our binaries) is last on the path. This means that the tools we install at this stage will be found before tools installed at previous stages, which is the desired behavior.</li>
+</ul>
+<p>Your output from this command should be something like:</p>
+<pre><code>I have no name!:/#
+</code></pre>
+<p class="return"><a href="index.html">Back to top</a></p>
+<h3 id="directory-structure">Directory Structure</h3>
+<p>We now need to create the basic directory structure inside our jail, in keeping with the FHS standard.</p>
+<h4 id="creating-directories">Creating Directories</h4>
+<pre><code>mkdir -pv /{bin,boot,etc/{opt,sysconfig},home,lib/firmware,mnt,opt}
+mkdir -pv /{media/{floppy,cdrom},sbin,srv,var}
+install -dv -m 0750 /root
+install -dv -m 1777 /tmp /var/tmp
+mkdir -pv /usr/{,local/}{bin,include,lib,sbin,src}
+mkdir -pv /usr/{,local/}share/{color,dict,doc,info,locale,man}
+mkdir -v  /usr/{,local/}share/{misc,terminfo,zoneinfo}
+mkdir -v  /usr/libexec
+mkdir -pv /usr/{,local/}share/man/man{1..8}
+
+case $(uname -m) in
+ x86_64) ln -sv lib /lib64
+ ln -sv lib /usr/lib64
+ ln -sv lib /usr/local/lib64 ;;
+esac
+
+mkdir -v /var/{log,mail,spool}
+ln -sv /run /var/run
+ln -sv /run/lock /var/lock
+mkdir -pv /var/{opt,cache,lib/{color,misc,locate},local}
+</code></pre>
+<p>Take special note of the permissions assigned to the root home directory and the temporary directories.</p>
+<p class="return"><a href="index.html">Back to top</a></p>
+<h3 id="required-files">Required Files</h3>
+<p>Some user-land programs require the existence of specific files before they can be installed or used. We create these files (or links) here. These will be replaced as we build and install the user-land.</p>
+<h4 id="creating-files-and-links">Creating Files and Links</h4>
+<p>Execute the following:</p>
+<pre><code>ln -sv /tools/bin/{bash,cat,echo,pwd,stty} /bin
+ln -sv /tools/bin/perl /usr/bin
+ln -sv /tools/lib/libgcc_s.so{,.1} /usr/lib
+ln -sv /tools/lib/libstdc++.so{,.6} /usr/lib
+sed 's/tools/usr/' /tools/lib/libstdc++.la &gt; /usr/lib/libstdc++.la
+ln -sv bash /bin/sh
+</code></pre>
+<p>The purpose of each is explained below:</p>
+<ul>
+<li><code>/bin/bash</code> :: Quite a few scripts expect the bash binary to be located here. Creating this symlink keeps those scripts from breaking.</li>
+<li><code>/bin/cat</code> :: Glibc hard-codes this pathname into its <code>configure</code> script.</li>
+<li><code>/bin/echo</code> :: Used by Glibc's test-suite; this path is also hard-coded.</li>
+<li><code>/bin/pwd</code> :: Used by Glibc; this path is hard-coded.</li>
+<li><code>/bin/stty</code> :: This pathname is hard-coded by the <code>expect</code> package.</li>
+<li><code>/usr/bin/perl</code> :: Many scripts expect to find the PERL binary at this location; this keeps them from breaking.</li>
+<li><code>/usr/lib/libgcc\_s.so{,.1}</code> :: This is need by Glibc to enable POSIX threads.</li>
+<li><code>/usr/lib/libstdc++{,.6}</code> :: Needed for C++ support by GMP and Glibc's test suite.</li>
+<li><code>/usr/lib/libstdc++.la</code> :: This prevents GCC from referencing a previously built library of the same name in our <code>tools</code> directory.</li>
+<li><code>/bin/sh</code> :: Some scripts hard-code this binary path.</li>
+</ul>
+<h4 id="mtab">mtab</h4>
+<p>The kernel historically exposes the list of mounted filesystems via the <code>/etc/mtab</code> file. Some user-land binaries expect this information available. To do this, execute:</p>
+<pre><code>ln -sv /proc/self/mounts /etc/mtab
+</code></pre>
+<h4 id="etcpasswd">/etc/passwd</h4>
+<p>The need for this file is obvious, without it, we can't set passwords or log in to our system once we boot it.</p>
+<pre><code>cat &gt; /etc/passwd &lt;&lt; "EOF"
+root:x:0:0:root:/root:/bin/bash
+bin:x:1:1:bin:/dev/null:/bin/false
+daemon:x:6:6:Daemon User:/dev/null:/bin/false
+messagebus:x:18:18:D-Bus Message Daemon User:/var/run/dbus:/bin/false
+nobody:x:99:99:Unprivileged User:/dev/null:/bin/false
+EOF
+</code></pre>
+<h4 id="etcgroup">/etc/group</h4>
+<p>This is another file we need to make use of file permissions properly.</p>
+<pre><code>cat &gt; /etc/group &lt;&lt; "EOF"
+root:x:0:
+bin:x:1:daemon
+sys:x:2:
+kmem:x:3:
+tape:x:4:
+tty:x:5:
+daemon:x:6:
+floppy:x:7:
+disk:x:8:
+lp:x:9:
+dialout:x:10:
+audio:x:11:
+video:x:12:
+utmp:x:13:
+usb:x:14:
+cdrom:x:15:
+adm:x:16:
+messagebus:x:18:
+systemd-journal:x:23:
+input:x:24:
+mail:x:34:
+nogroup:x:99:
+users:x:999:
+EOF
+</code></pre>
+<h4 id="re-executing-our-login-shell">Re-executing Our Login Shell</h4>
+<p>The following command instructs bash to execute another login. This results in our bash prompt changing, as we've now installed the <code>etc/passwd</code> and <code>/etc/group</code> files.</p>
+<pre><code>exec /tools/bin/bash --login +h
+</code></pre>
+<p>Your login prompt should now reflect the user <em>root</em>.</p>
+<h4 id="mandatory-log-files">Mandatory Log Files</h4>
+<p>We need to populate <code>/var/log</code> with files that are expected by a number of user-land utilities.</p>
+<pre><code>touch /var/log/{btmp,lastlog,faillog,wtmp}
+chgrp -v utmp /var/log/lastlog
+chmod -v 664  /var/log/lastlog
+chmod -v 600  /var/log/btmp
+</code></pre>
+<p class="return"><a href="index.html">Back to top</a></p>
+<h3 id="installing-the-kernel-headers-again">Installing the Kernel Headers (Again)</h3>
+<p>Just as during the second stage build, we need to extract the kernel headers for GCC and other programs that need them. Note that we're installing them in a different location this time.</p>
+<h4 id="extracting-the-kernel-header-files-2">Extracting the Kernel Header Files</h4>
+<p>Change into the kernel source directory:
+/sources/linux-4.x</p>
+<p>Change into this directory and issue the following command:</p>
+<pre><code>make mrproper
+</code></pre>
+<p>That done, we now call the <code>make</code> command, specifying the header file output path; we do this in two steps because <code>make</code> wipes any files from the destination directory during this step. First, we extract the files:</p>
+<pre><code>make INSTALL_HDR_PATH=dest headers_install
+</code></pre>
+<p>Now we remove any files that are not specifically needed, which leaves us with only the headers which are intended to be exposed to the user-land:</p>
+<pre><code>find dest/include \( -name .install -o -name ..install.cmd \) -delete
+</code></pre>
+<p>And secondly, we copy them to the proper location:</p>
+<pre><code>cp -rv dest/include/* /usr/include
+</code></pre>
+<h3 id="installing-man-pages">Installing man Pages</h3>
+<p>In the <code>man-pages</code> source directory, execute:</p>
+<pre><code>make install
+</code></pre>
+<p class="return"><a href="index.html">Back to top</a></p>
+<h3 id="building-glibc-stage-3">Building Glibc, Stage 3</h3>
+<p>This is our final build of glibc!</p>
+<h4 id="patching-the-source">Patching the Source</h4>
+<p>To ensure compliance with the FHS, we need to patch the glibc source code. Execute the following commands to copy the patch file to the source directory and apply the patch:</p>
+<pre><code>cp ../glibc-2.24-fhs-1.patch .
+patch -Np1 -i glibc-2.24-fhs-1.patch
+</code></pre>
+<h4 id="configure-20">Configure</h4>
+<pre><code>../configure --prefix=/usr          \
+             --enable-kernel=2.6.32 \
+             --enable-obsolete-rpc
+</code></pre>
+<p>These options are identical to those used to configure glibc in our first stage.</p>
+<h4 id="compile-4">Compile</h4>
+<pre><code>make
+</code></pre>
+<h4 id="test">Test</h4>
+<p>Unlike previous build stages, we now have all of the dependencies needed to run the tests against our binaries before we install them. <em>This step is critical!</em> Any problems with them build toolchain, the environment, library paths, etc., will likely reveal themselves at this point.</p>
+<pre><code>make check
+</code></pre>
+<p>Note that you will have some of the tests fail, in particular those related to the <code>getaddrinfo</code> functions. Overall, your output from <code>make check</code> should look something like this:</p>
+<pre><code>UNSUPPORTED: elf/tst-audit10
+XPASS: elf/tst-protected1a
+XPASS: elf/tst-protected1b
+UNSUPPORTED: math/test-double-libmvec-alias-avx2
+UNSUPPORTED: math/test-double-libmvec-alias-avx2-main
+UNSUPPORTED: math/test-double-libmvec-alias-avx512
+UNSUPPORTED: math/test-double-libmvec-alias-avx512-main
+UNSUPPORTED: math/test-double-libmvec-sincos-avx2
+UNSUPPORTED: math/test-double-libmvec-sincos-avx512
+UNSUPPORTED: math/test-float-libmvec-alias-avx2
+UNSUPPORTED: math/test-float-libmvec-alias-avx2-main
+UNSUPPORTED: math/test-float-libmvec-alias-avx512
+UNSUPPORTED: math/test-float-libmvec-alias-avx512-main
+UNSUPPORTED: math/test-float-libmvec-sincosf-avx2
+UNSUPPORTED: math/test-float-libmvec-sincosf-avx512
+FAIL: posix/tst-getaddrinfo4
+FAIL: posix/tst-getaddrinfo5
+Summary of test results:
+      2 FAIL
+   2478 PASS
+     13 UNSUPPORTED
+     43 XFAIL
+      2 XPASS
+make[1]: *** [Makefile:331: tests] Error 1
+make[1]: Leaving directory '/sources/glibc-2.24'
+make: *** [Makefile:9: check] Error 2
+</code></pre>
+<h4 id="create-etcldsoconf">Create /etc/ld.so.conf</h4>
+<p><code>make</code> will throw an error if this file does not exist when the install is run.</p>
+<pre><code>touch /etc/ld.so.conf
+</code></pre>
+<h4 id="install-7">Install</h4>
+<pre><code>make install
+</code></pre>
+<h4 id="install-the-configuration-file-and-runtime-for-nscd">Install the Configuration File and Runtime for nscd</h4>
+<pre><code> cp -v ../nscd/nscd.conf /etc/nscd.conf
+ mkdir -pv /var/cache/nscd
+</code></pre>
+<h4 id="installing-locale-files">Installing Locale Files</h4>
+<p>The following locales should be defined, if only to enable compliance with future tests.</p>
+<h5 id="create-the-locales-directory">Create The Locales Directory</h5>
+<pre><code>mkdir -pv /usr/lib/locale
+</code></pre>
+<h5 id="install-the-locale-definitions">Install the Locale Definitions</h5>
+<pre><code>localedef -i cs_CZ -f UTF-8 cs_CZ.UTF-8
+localedef -i de_DE -f ISO-8859-1 de_DE
+localedef -i de_DE@euro -f ISO-8859-15 de_DE@euro
+localedef -i de_DE -f UTF-8 de_DE.UTF-8
+localedef -i en_GB -f UTF-8 en_GB.UTF-8
+localedef -i en_HK -f ISO-8859-1 en_HK
+localedef -i en_PH -f ISO-8859-1 en_PH
+localedef -i en_US -f ISO-8859-1 en_US
+localedef -i en_US -f UTF-8 en_US.UTF-8
+localedef -i es_MX -f ISO-8859-1 es_MX
+localedef -i fa_IR -f UTF-8 fa_IR
+localedef -i fr_FR -f ISO-8859-1 fr_FR
+localedef -i fr_FR@euro -f ISO-8859-15 fr_FR@euro
+localedef -i fr_FR -f UTF-8 fr_FR.UTF-8
+localedef -i it_IT -f ISO-8859-1 it_IT
+localedef -i it_IT -f UTF-8 it_IT.UTF-8
+localedef -i ja_JP -f EUC-JP ja_JP
+localedef -i ru_RU -f KOI8-R ru_RU.KOI8-R
+localedef -i ru_RU -f UTF-8 ru_RU.UTF-8
+localedef -i tr_TR -f UTF-8 tr_TR.UTF-8
+localedef -i zh_CN -f GB18030 zh_CN.GB18030
+</code></pre>
+<h4 id="glibc-configuration-post-install">Glibc Configuration (Post-install)</h4>
+<p>We undertake the following steps to configure glibc after installing.</p>
+<h5 id="add-etcnsswitchconf">Add /etc/nsswitch.conf</h5>
+<pre><code>cat &gt; /etc/nsswitch.conf &lt;&lt; "EOF"
+# Begin /etc/nsswitch.conf
+
+passwd: files
+group: files
+shadow: files
+
+hosts: files dns
+networks: files
+
+protocols: files
+services: files
+ethers: files
+rpc: files
+
+# End /etc/nsswitch.conf
+EOF
+</code></pre>
+<h5 id="add-timezone-files-and-configure-our-timezone">Add Timezone Files and Configure Our Timezone</h5>
+<p>For this step, we stay in the glibc build directory, and unzip the timezone data files to our current location.</p>
+<pre><code>tar -xf ../../tzdata2016f.tar.gz
+</code></pre>
+<p>Now we need to configure our timezones:</p>
+<pre><code>export ZONEINFO=/usr/share/zoneinfo
+mkdir -pv $ZONEINFO/{posix,right}
+for tz in etcetera southamerica northamerica europe africa antarctica  \
+          asia australasia backward pacificnew systemv; do
+    zic -L /dev/null   -d $ZONEINFO       -y "sh yearistype.sh" ${tz}
+    zic -L /dev/null   -d $ZONEINFO/posix -y "sh yearistype.sh" ${tz}
+    zic -L leapseconds -d $ZONEINFO/right -y "sh yearistype.sh" ${tz}
+done
+cp -v zone.tab zone1970.tab iso3166.tab $ZONEINFO
+zic -d $ZONEINFO -p Etc/GMT
+zic -d $ZONEINFO -p Etc/UTC
+unset ZONEINFO
+</code></pre>
+<h5 id="set-the-local-timezone">Set the Local Timezone</h5>
+<pre><code>cp -v /usr/share/zoneinfo/Etc/UTC /etc/localtime
+</code></pre>
+<h5 id="configuring-the-dynamic-loader">Configuring the Dynamic Loader</h5>
+<p>The dynamic loader is what allows shared objects (libraries) to be called at run-time by any given binary. In this step, inform glibc what paths to search when configuring the dynamic loader:</p>
+<pre><code>cat &gt;&gt; /etc/ld.so.conf &lt;&lt; "EOF"
+# Add an include directory
+include /etc/ld.so.conf.d/*.conf
+
+EOF
+</code></pre>
+<p>And last, create the directory referenced in <code>/etc/ld.so.conf</code>:</p>
+<pre><code>mkdir -pv /etc/ld.so.conf.d
+</code></pre>
+<p class="return"><a href="index.html">Back to top</a></p>
+<h3 id="adjusting-the-toolchain">Adjusting the Toolchain</h3>
+<p>Now that we've got a native glibc installed, we need to reconfigure our toolchain so that it looks for libraries and utilities inside the root filesystem hierarchy instead of looking in <code>/tools</code>.</p>
+<h4 id="backup-the-existing-linker">Backup the Existing Linker</h4>
+<p>Let's backup the existing linker, and replace it with the one we've most recently built:</p>
+<pre><code>mv -v /tools/bin/{ld,ld-old}
+mv -v /tools/$(uname -m)-pc-linux-gnu/bin/{ld,ld-old}
+mv -v /tools/bin/{ld-new,ld}
+ln -sv /tools/bin/ld /tools/$(uname -m)-pc-linux-gnu/bin/ld
+</code></pre>
+<h4 id="reconfigure-gcc">Reconfigure GCC</h4>
+<p>We now need to alter the GCC so that it uses the new dynamic linker, headers and glibc libraries:</p>
+<pre><code>gcc -dumpspecs | sed -e 's@/tools@@g'                   \
+    -e '/\*startfile_prefix_spec:/{n;s@.*@/usr/lib/ @}' \
+    -e '/\*cpp:/{n;s@$@ -isystem /usr/include@}' &gt;      \
+    `dirname $(gcc --print-libgcc-file-name)`/specs 
+</code></pre>
+<h4 id="test-the-gcc-configuration">Test the GCC Configuration</h4>
+<p>It is imperative that GCC use the proper linker and libraries when compiling. We can check that using the following commands:</p>
+<pre><code>echo 'int main(){}' &gt; dummy.c
+cc dummy.c -v -Wl,--verbose &amp;&gt; dummy.log
+readelf -l a.out | grep ': /lib'
+</code></pre>
+<p>Your output should be something like this:</p>
+<pre><code>[Requesting program interpreter: /lib64/ld-linux-x86-64.so.2]
+</code></pre>
+<p>Be certain that the interpreter path <em>does not</em> include the string 'tools'. If it does, GCC has not been properly reconfigured and will break.</p>
+<p>Additionally, we should check to ensure GCC is using the proper glibc startup files:</p>
+<pre><code>grep -o '/usr/lib.*/crt[1in].*succeeded' dummy.log
+</code></pre>
+<p>Your output should resemble something like this:</p>
+<pre><code>/usr/lib/../lib64/crt1.o succeeded
+/usr/lib/../lib64/crti.o succeeded
+/usr/lib/../lib64/crtn.o succeeded
+</code></pre>
+<p class="return"><a href="index.html">Back to top</a></p>
+<h3 id="installing-binutils-dependencies">Installing binutils' Dependencies</h3>
+<p>The test suite included with binutils depends on the zlib and file packages. Let's install these before moving on to binutils itself.</p>
+<h4 id="installing-zlib">Installing zlib</h4>
+<h5 id="configure-21">Configure</h5>
+<p>zlib does not make use of a <code>configure</code> script.</p>
+<h5 id="compile-5">Compile</h5>
+<pre><code>make
+</code></pre>
+<h5 id="make-check">Make check</h5>
+<pre><code>make check
+</code></pre>
+<h5 id="install-8">Install</h5>
+<pre><code>make install
+</code></pre>
+<h5 id="post-configuration">Post-configuration</h5>
+<p>The shared library needs to be moved to <code>/lib</code>, and a symlink needs to be created in <code>/usr/lib</code>. This is to ensure compliance with FHS:</p>
+<pre><code>mv -v /usr/lib/libz.so.* /lib
+rm /usr/lib/libz.so
+ln -sfv /lib/libz.so.1.2.8 /usr/lib/libz.so
+</code></pre>
+<h4 id="installing-file">Installing file</h4>
+<p>This is another package upon which the binutils test suite depends.</p>
+<h5 id="configure-22">Configure</h5>
+<pre><code>./configure --prefix=/usr
+</code></pre>
+<h5 id="compile-6">Compile</h5>
+<pre><code>make
+</code></pre>
+<h5 id="test-2">Test</h5>
+<pre><code>make check
+</code></pre>
+<h5 id="install-9">Install</h5>
+<pre><code>make install
+</code></pre>
+<p class="return"><a href="index.html">Back to top</a></p>
+<h3 id="installing-binutils-stage-3">Installing binutils (Stage 3)</h3>
+<p>This is our third (and final) installation of binutils.</p>
+<h4 id="start-with-fresh-source">Start With Fresh Source</h4>
+<p>Firstly, delete any existing binutils source directory, an re-extract the source code from the tar archive:
+rm -rf binutils-2.27
+tar xf binutils-2.27.tar</p>
+<h4 id="check-to-ensure-ptys-work-in-the-jail">Check to Ensure ptys Work in the Jail</h4>
+<p>We need this to perform the tests against the binutils build. Execute:
+expect -c "spawn ls"</p>
+<p>The output should be:
+spawn ls</p>
+<h4 id="configure-and-build">Configure and Build</h4>
+<p>Create the build directory as per usual, and issue the following commands to configure, build, test, and install binutils:
+../configure --prefix=/usr --enable-shared --disable-werror
+make tooldir=/usr
+make -k check
+make tooldir=/usr install</p>
+<p class="return"><a href="index.html">Back to top</a></p>
+<h3 id="installing-binutils-stage-3-2">Installing binutils Stage 3</h3>
+<p>This is our third (and final) installation of binutils.</p>
+<h4 id="start-with-a-fresh-source">Start with a Fresh Source</h4>
+<p>First, delete any existing binutils source directory, and re-extract the source code from the tar archive:</p>
+<pre><code>rm -rf binutils-2.27
+tar xf binutils-2.27.tar
+</code></pre>
+<h4 id="check-to-ensure-ptys-work-in-the-jail-2">Check to Ensure ptys Work in the Jail</h4>
+<p>We need this to perform the tests against the binutils build. Execute:</p>
+<pre><code>expect -c "spawn ls"
+</code></pre>
+<p>The output should be:</p>
+<pre><code>spawn ls
+</code></pre>
+<h4 id="configure-and-build-2">Configure and Build</h4>
+<p>Create the build directory as usual, and issue the following commands to configure, build, test and install binutils:</p>
+<pre><code>../configure --prefix=/usr --enable-shared --disable-werror
+make tooldir=/usr
+make -k check
+make tooldir=/usr install
+</code></pre>
+<p class="return"><a href="index.html">Back to top</a></p>
+<h3 id="installing-gmp">Installing GMP</h3>
+<p>The GMP package contains several math libraries. These are used mainly with precision arithmetic.</p>
+<p>Unlike glibc and gcc, GMP does not require the use of a build directory.</p>
+<h4 id="configure-and-compile">Configure and Compile</h4>
+<p>The configure options are explained below. Execute:</p>
+<pre><code>./configure --prefix=/usr --enable-cxx --disable-static --docdir=/usr/share/doc/gmp-6.1.1
+</code></pre>
+<ul>
+<li><code>prefix</code> :: Tells the configure script where the compiled binaries should be installed.</li>
+<li><code>enable-cxx</code> :: Enables C++ support.</li>
+<li><code>disable-static</code> :: Disables the generation of static libraries.</li>
+<li><code>docdir</code> :: Specifies the prefix for installation documentation.</li>
+</ul>
+<h4 id="compile-7">Compile</h4>
+<pre><code>make &amp;&amp; make html
+</code></pre>
+<h4 id="test-3">Test</h4>
+<pre><code>make check 2&gt;&amp;1 | tee gmp-check-log
+</code></pre>
+<p>Ensure that all 190 of the tests have passed using the following command:</p>
+<pre><code>awk '/# PASS:/{total+=$3} ; END{print total}' gmp-check-log
+</code></pre>
+<h4 id="install-10">Install</h4>
+<pre><code>make install &amp;&amp; make install-html
+</code></pre>
+<p class="return"><a href="index.html">Back to top</a></p>
+<h3 id="installing-mpfr">Installing MPFR</h3>
+<p>Unlike glibc and gcc, MPFR does not require the use of a build directory.</p>
+<h4 id="configure-and-compile-2">Configure and Compile</h4>
+<p>The configure options are explained below. Execute:</p>
+<pre><code>./configure --prefix=/usr --disable-static  --enable-thread-safe --docdir=/usr/share/doc/mpfr-3.1.4
+</code></pre>
+<ul>
+<li><code>prefix</code> :: Tells the configure script where the compiled binaries should be installed.</li>
+<li><code>disable-static</code> :: Disables the generation of static libraries.</li>
+<li><code>enable-thread-safe</code> :: Enables thread-handling in the library.</li>
+<li><code>docdir</code> :: Specifies the prefix for installation documentation.</li>
+</ul>
+<h4 id="compile-8">Compile</h4>
+<pre><code>make &amp;&amp; make html
+</code></pre>
+<h4 id="test-4">Test</h4>
+<pre><code>make check 
+</code></pre>
+<h4 id="install-11">Install</h4>
+<pre><code>make install &amp;&amp; make install-html
+</code></pre>
+<p class="return"><a href="index.html">Back to top</a></p>
+<h3 id="installing-mpc">Installing MPC</h3>
+<p>The MPC package installs libraries which handle rounding and high-precision numbers.</p>
+<p>Unlike glibc and gcc, MPC does not require the use of a build directory.</p>
+<h4 id="configure-and-compile-3">Configure and Compile</h4>
+<pre><code>./configure --prefix=/usr --disable-static --docdir=/usr/share/doc/mpc-1.0.3
+</code></pre>
+<h4 id="compile-9">Compile</h4>
+<pre><code>make &amp;&amp; make html
+</code></pre>
+<h4 id="test-5">Test</h4>
+<pre><code>make check 
+</code></pre>
+<h4 id="install-12">Install</h4>
+<pre><code>make install &amp;&amp; make install-html
+</code></pre>
+<p class="return"><a href="index.html">Back to top</a></p>
+<h3 id="installing-gcc">Installing GCC</h3>
+<p>This is the fourth (and final) build of GCC. Make sure you've deleted the existing GCC directory, and re-extracted the source code from the tar file.</p>
+<h4 id="configure-and-compile-4">Configure and Compile</h4>
+<p>Create the build directory, as per usual. Note that the <code>SED</code> variable here prevents GCC from hard-coding a path to the <code>sed</code> binary.</p>
+<p>Note as well that we do not copy the <code>mpc</code>, <code>mpfr</code> or <code>gap</code> source packages into the GCC source directory, as we've installed these previously on the system.</p>
+<p>Execute the following to begin the build:</p>
+<pre><code>export SED=sed                               
+../configure --prefix=/usr --enable-languages=c,c++ --disable-multilib --disable-bootstrap --with-system-zlib
+</code></pre>
+<ul>
+<li><code>prefix</code> :: Tells the configure script where the compiled binaries should be installed.</li>
+<li><code>enable-languages</code> :: We only need C and C++ right now. Others can be added later.</li>
+<li><code>disable-multilib</code> :: This functionality isn't supported on the x86_64 platform.</li>
+<li><code>disable-bootstrap</code> :: We prevent GCC from performing a bootstrap build. As we've built GCC as a cross compiler, and then built GCC natively, we are now using the native build to compile GCC a third time. A bootstrapped build replicates these steps, which should be unnecessary if all of the testing has been executed as recommended.</li>
+<li><code>with-system-zib</code> :: This instructs <code>make</code> to use the system zlib library instead of that bundled with GCC.</li>
+</ul>
+<h4 id="compile-10">Compile</h4>
+<pre><code>make -j2
+</code></pre>
+<h4 id="test-6">Test</h4>
+<p>Before we run the tests, we need to make sure the stack size is large enough to accommodate the testing software. We increase the stack size using the <code>ulimit</code> command:</p>
+<pre><code>ulimit -s 32768
+</code></pre>
+<p>And now run our tests:</p>
+<pre><code>make -k check 
+</code></pre>
+<h4 id="check-the-test-results">Check the Test Results</h4>
+<p>You should have very few errors reported.</p>
+<pre><code>../contrib/test_summary
+</code></pre>
+<h4 id="install-13">Install</h4>
+<pre><code>make install 
+</code></pre>
+<h4 id="add-fhs-mandated-symlink">Add FHS-Mandated Symlink:</h4>
+<pre><code>ln -sv ../usr/bin/cpp /lib
+</code></pre>
+<h4 id="add-a-cc-link-to-the-gcc-binary">Add a cc Link to the GCC Binary</h4>
+<pre><code>ln -sv gcc /usr/bin/cc
+</code></pre>
+<h4 id="add-compatibility-symlinks">Add Compatibility Symlinks</h4>
+<pre><code>install -v -dm755 /usr/lib/bfd-plugins
+ln -sfv ../../libexec/gcc/$(gcc -dumpmachine)/6.2.0/liblto_plugin.so /usr/lib/bfd-plugins/
+</code></pre>
+<h4 id="sanity-check-5">Sanity Check</h4>
+<p>Once again, we stop here to check the functionality of our toolchain. Execute the following commands:</p>
+<pre><code>echo 'int main(){}' &gt; dummy.c
+cc dummy.c -v -Wl,--verbose &amp;&gt; dummy.log
+readelf -l a.out | grep ': /lib'
+</code></pre>
+<h5 id="check-gcc-startup">Check GCC Startup</h5>
+<p>Now we want to check that GCC is using the proper set of files when it starts:</p>
+<pre><code>grep -o '/usr/lib.*/crt[1in].*succeeded' dummy.log
+</code></pre>
+<p>Result:</p>
+<pre><code>/usr/lib/gcc/i686-pc-linux-gnu/6.2.0/../../../crt1.o succeeded
+/usr/lib/gcc/i686-pc-linux-gnu/6.2.0/../../../crti.o succeeded
+/usr/lib/gcc/i686-pc-linux-gnu/6.2.0/../../../crtn.o succeeded
+</code></pre>
+<h5 id="check-that-gcc-uses-the-proper-header-files">Check that GCC Uses the Proper Header Files</h5>
+<pre><code>grep -B4 '^ /usr/include' dummy.log
+</code></pre>
+<p>Results:</p>
+<pre><code>##include &lt;...&gt; search starts here:
+ /usr/lib/gcc/i686-pc-linux-gnu/6.2.0/include
+ /usr/local/include
+ /usr/lib/gcc/i686-pc-linux-gnu/6.2.0/include-fixed
+ /usr/include
+</code></pre>
+<h5 id="verify-the-linker-uses-proper-search-paths">Verify the Linker Uses Proper Search Paths</h5>
+<pre><code>grep 'SEARCH.*/usr/lib' dummy.log |sed 's|; |\n|g'
+SEARCH_DIR("/usr/x86_64-unknown-linux-gnu/lib64")
+SEARCH_DIR("/usr/local/lib64")
+SEARCH_DIR("/lib64")
+SEARCH_DIR("/usr/lib64")
+SEARCH_DIR("/usr/x86_64-unknown-linux-gnu/lib")
+SEARCH_DIR("/usr/local/lib")
+SEARCH_DIR("/lib")
+SEARCH_DIR("/usr/lib");
+</code></pre>
+<h5 id="ensure-were-using-the-proper-libc-implementation">Ensure We're Using the Proper Libc Implementation</h5>
+<pre><code>grep "/lib.*/libc.so.6 " dummy.log
+</code></pre>
+<p>Result:</p>
+<pre><code>attempt to open /lib/libc.so.6 succeeded
+</code></pre>
+<h5 id="ensure-gcc-uses-the-correct-dynamic-linker">Ensure GCC Uses the Correct Dynamic Linker</h5>
+<pre><code>grep found dummy.log
+</code></pre>
+<p>Result:</p>
+<pre><code>found ld-linux.so.2 at /lib/ld-linux.so.2
+</code></pre>
+<h5 id="cleanup-2">Cleanup</h5>
+<pre><code>rm -v dummy.c a.out dummy.log
+</code></pre>
+<h4 id="move-a-misplaced-file">Move a Misplaced File</h4>
+<p>Only execute this step if GCC has built correctly and all of the sanity checks are passed:</p>
+<pre><code>mkdir -pv /usr/share/gdb/auto-load/usr/lib
+mv -v /usr/lib/*gdb.py /usr/share/gdb/auto-load/usr/lib
+</code></pre>
+<p class="return"><a href="index.html">Back to top</a></p>
+<h3 id="installing-bzip2">Installing Bzip2</h3>
+<p>This package does not require the use of a build directory. Be sure to start with a fresh source directory extracted from the tar file.</p>
+<h4 id="patch-and-amend-the-source">Patch and Amend the Source</h4>
+<p>Change into the <code>bzip2</code> source directory, and run the following command to patch the source:</p>
+<pre><code>patch -Np1 -i ../bzip2-1.0.6-install_docs-1.patch
+</code></pre>
+<p>Also, we need to amend the source code to ensure that symbolic links are installed using relative paths:</p>
+<pre><code>sed -i 's@\(ln -s -f \)$(PREFIX)/bin/@\1@' Makefile
+</code></pre>
+<p>This amendment ensures man page are installed to the proper location:</p>
+<pre><code>sed -i "s@(PREFIX)/man@(PREFIX)/share/man@g" Makefile
+</code></pre>
+<p>And now we need to reconstruct the <code>make</code> file. The following commands cause <code>make</code> to use a different file; the makefile we create here adds a <code>libb2.s</code> shared library, and links the <code>bzip2</code> utilities against it. Execute:</p>
+<pre><code>make -f Makefile-libbz2_so
+make clean
+</code></pre>
+<h4 id="compile-and-install-13">Compile and Install</h4>
+<pre><code>make
+make PREFIX=/usr install
+</code></pre>
+<h4 id="copy-the-shared-binary-into-the-appropriate-directory-and-make-symbolic-links">Copy the Shared Binary into the Appropriate Directory and Make Symbolic Links:</h4>
+<pre><code>cp -v bzip2-shared /bin/bzip2
+cp -av libbz2.so* /lib
+ln -sv ../../lib/libbz2.so.1.0 /usr/lib/libbz2.so
+rm -v /usr/bin/{bunzip2,bzcat,bzip2}
+ln -sv bzip2 /bin/bunzip2
+ln -sv bzip2 /bin/bzcat
+</code></pre>
+<p class="return"><a href="index.html">Back to top</a></p>
+<h3 id="installing-pkg-config">Installing pkg-config</h3>
+<p><code>pkg-config</code> does not require the use of a build directory.</p>
+<h4 id="configure-and-compile-5">Configure and Compile</h4>
+<p>The configure options are explained below. Execute:</p>
+<pre><code>./configure --prefix=/usr --with-internal-glib --disable-compile-warnings --disable-host-tool --docdir=/usr/share/doc/pkg-config-0.29.1
+</code></pre>
+<ul>
+<li><code>prefix</code> :: Tells the configure script where the compiled binaries should be installed.</li>
+<li><code>with-internal-glib</code> :: Allows <code>pkg-config</code> to use an internal glibc, as a system version is not available.</li>
+<li><code>disable-compile-warnings</code> :: Prevents the use of compilation flags which could result in build failure.</li>
+<li><code>disable-host-tool</code> :: Disables the creation of a hard-link to the <code>pkg-config</code> binary.</li>
+</ul>
+<h4 id="compile-11">Compile</h4>
+<pre><code>make 
+</code></pre>
+<h4 id="test-7">Test</h4>
+<pre><code>make check 
+</code></pre>
+<h4 id="install-14">Install</h4>
+<pre><code>make install 
+</code></pre>
+<p class="return"><a href="index.html">Back to top</a></p>
+<h3 id="installing-ncurses">Installing ncurses</h3>
+<p>This package does not require the use of a build directory. Be sure to start with a fresh source directory extracted from the tar file.</p>
+<h4 id="amend-the-source">Amend the Source</h4>
+<p>This command prevents the installation of a static library otherwise not handled by <code>configure</code>:</p>
+<pre><code>sed -i '/LIBTOOL_INSTALL/d' c++/Makefile.in
+</code></pre>
+<h4 id="configure-and-compile-6">Configure and Compile</h4>
+<p>The configure options are explained below. Execute:</p>
+<pre><code>./configure --prefix=/usr --mandir=/usr/share/man --with-shared --without-debug --without-normal --enable-pc-files --enable-widec
+</code></pre>
+<ul>
+<li><code>widec</code> :: Causes wide-character libraries to be installed. Wide character libraries are usable by both multibyte and traditional locales.</li>
+<li><code>enable-pc-file</code> :: Generates .pc files for <code>pkg-config</code>.</li>
+<li><code>without-normal</code> :: Disables the building of most static libraries.</li>
+</ul>
+<h4 id="compile-12">Compile</h4>
+<pre><code>make 
+</code></pre>
+<h4 id="test-8">Test</h4>
+<pre><code>make check 
+</code></pre>
+<h4 id="install-15">Install</h4>
+<pre><code>make install
+</code></pre>
+<p>Move the shared libraries to the <code>/lib</code> directory:</p>
+<pre><code>mv -v /usr/lib/libncursesw.so.6* /lib
+</code></pre>
+<p>Because we've moved the library files, there is now a symlink to a non-existent file. So we need to re-create it:</p>
+<pre><code>ln -sfv ../../lib/$(readlink /usr/lib/libncursesw.so) /usr/lib/libncursesw.so
+</code></pre>
+<p>These symlinks make the wide-character libraries accessible to binaries which expect to find the non-wide libraries:</p>
+<pre><code>for lib in ncurses form panel menu ; do
+    rm -vf                    /usr/lib/lib${lib}.so
+    echo "INPUT(-l${lib}w)" &gt; /usr/lib/lib${lib}.so
+    ln -sfv ${lib}w.pc        /usr/lib/pkgconfig/${lib}.pc
+done
+</code></pre>
+<p>This snippet ensures that binaries which look for <code>-lcurses</code> at build time are still buildable:</p>
+<pre><code>rm -vf                     /usr/lib/libcursesw.so
+echo "INPUT(-lncursesw)" &gt; /usr/lib/libcursesw.so
+ln -sfv libncurses.so      /usr/lib/libcurses.so
+</code></pre>
+<p>Install the documentation:</p>
+<pre><code>mkdir -v       /usr/share/doc/ncurses-6.0
+cp -v -R doc/* /usr/share/doc/ncurses-6.0
+</code></pre>
+<p class="return"><a href="index.html">Back to top</a></p>
+<h3 id="installing-attr">Installing attr</h3>
+<p>This package does not require the use of a build directory.</p>
+<h4 id="amend-the-source-2">Amend the Source</h4>
+<p>Amend the location of the documentation directory so that it uses a version number:</p>
+<pre><code>sed -i -e 's|/@pkg_name@|&amp;-@pkg_version@|' include/builddefs.in
+</code></pre>
+<p>Prevent <code>make</code> from overwriting man pages installed by the <code>man-pages</code> package:</p>
+<pre><code>sed -i -e "/SUBDIRS/s|man[25]||g" man/Makefile
+</code></pre>
+<h4 id="configure-and-compile-7">Configure and Compile</h4>
+<p>Execute:</p>
+<pre><code>./configure --prefix=/usr --bindir=/bin --disable-static
+</code></pre>
+<h4 id="compile-13">Compile</h4>
+<pre><code>make 
+</code></pre>
+<h4 id="test-9">Test</h4>
+<pre><code>make -j1 tests root-tests
+</code></pre>
+<h4 id="install-16">Install</h4>
+<pre><code>make install install-dev install-lib
+</code></pre>
+<p>Change the permissions on the shared library:</p>
+<pre><code>chmod -v 755 /usr/lib/libattr.so
+</code></pre>
+<p>Move the shared library to <code>/lib</code>:</p>
+<pre><code>mv -v /usr/lib/libattr.so.* /lib
+</code></pre>
+<p>Which results in a missing library in <code>/usr/lib</code>, which we recreate with a symlink:</p>
+<pre><code>ln -sfv ../../lib/$(readlink /usr/lib/libattr.so) /usr/lib/libattr.so
+</code></pre>
+<p class="return"><a href="index.html">Back to top</a></p>
+<h3 id="installing-acl">Installing acl</h3>
+<p>This package does not require the use of a build directory.</p>
+<h4 id="amend-the-source-3">Amend the Source</h4>
+<p>Amend the location of the documentation directory so that it uses a version number:</p>
+<pre><code>sed -i -e 's|/@pkg_name@|&amp;-@pkg_version@|' include/builddefs.in
+</code></pre>
+<p>Fix some broken tests:</p>
+<pre><code>sed -i "s:| sed.*::g" test/{sbits-restore,cp,misc}.test
+</code></pre>
+<p>Fix a bug which causes <code>getfacl -e</code> to segfault on long group names:</p>
+<pre><code>sed -i -e "/TABS-1;/a if (x &gt; (TABS-1)) x = (TABS-1);" libacl/__acl_to_any_text.c
+</code></pre>
+<h4 id="configure-and-compile-8">Configure and Compile</h4>
+<p>Execute:</p>
+<pre><code>./configure --prefix=/usr --bindir=/bin --disable-static --libexecdir=/usr/lib
+</code></pre>
+<h4 id="compile-14">Compile</h4>
+<pre><code>make 
+</code></pre>
+<h4 id="install-17">Install</h4>
+<pre><code>make install install-dev install-lib
+</code></pre>
+<p>Change the permissions on the shared library:</p>
+<pre><code>chmod -v 755 /usr/lib/libacl.so
+</code></pre>
+<p>Move the shared library to <code>/lib</code>:</p>
+<pre><code>mv -v /usr/lib/libacl.so.* /lib
+</code></pre>
+<p>Which results in a missing library in <code>/usr/lib</code>, which we recreate with a symlink:</p>
+<pre><code>ln -sfv ../../lib/$(readlink /usr/lib/libacl.so) /usr/lib/libacl.so
+</code></pre>
+<p class="return"><a href="index.html">Back to top</a></p>
+<h3 id="installing-libpcap">Installing libpcap</h3>
+<p>This package does not require the use of a build directory.</p>
+<h4 id="amend-the-source-4">Amend the Source</h4>
+<p>Prevent <code>make</code> from installing a static library:</p>
+<pre><code>sed -i '/install.*STALIBNAME/d' libcap/Makefile
+</code></pre>
+<h4 id="configure-and-compile-9">Configure and Compile</h4>
+<p>The package doesn't make use of a <code>configure</code> script:</p>
+<pre><code>make
+</code></pre>
+<h4 id="install-18">Install</h4>
+<p>The <code>RAISE_SETFCAP</code> variable defined on the command line prevents the use of <code>setcap</code> on the resulting library. This is necessary if the kernel or filesystem doesn't not support extended capabilities.</p>
+<pre><code>make RAISE_SETFCAP=no prefix=/usr install
+chmod -v 755 /usr/lib/libcap.so
+</code></pre>
+<p>Move the shared library to <code>/lib</code>:</p>
+<pre><code>mv -v /usr/lib/libcap.so.* /lib
+</code></pre>
+<p>Which results in a missing library in <code>/usr/lib</code>, which we recreate with a symlink:</p>
+<pre><code>ln -sfv ../../lib/$(readlink /usr/lib/libcap.so) /usr/lib/libcap.so
+</code></pre>
+<p class="return"><a href="index.html">Back to top</a></p>
+<h3 id="installing-sed">Installing sed</h3>
+<p>This package does not require the use of a build directory. Be sure to start with a fresh source directory extracted from the tar file.</p>
+<h4 id="configure-23">Configure</h4>
+<pre><code>./configure --prefix=/usr --bindir=/bin --htmldir=/usr/share/doc/sed-4.2.2
+</code></pre>
+<h4 id="compile-15">Compile</h4>
+<pre><code>make
+make html
+</code></pre>
+<h4 id="test-10">Test</h4>
+<p>Note that the 'version' test may fail, resulting in a total of 5 failed tests of 66:</p>
+<pre><code>make check 
+</code></pre>
+<h4 id="install-19">Install</h4>
+<pre><code>make install
+make -C doc install-html
+</code></pre>
+<p class="return"><a href="index.html">Back to top</a></p>
+<h3 id="installing-shadow">Installing shadow</h3>
+<p>This package does not require the use of a build directory.</p>
+<h4 id="amend-the-source-5">Amend the Source</h4>
+<p>Prevent <code>make</code> from installing <code>groups</code>-related programs and related man pages. These will be installed by the <code>coreutils</code> package.</p>
+<pre><code>sed -i '/install.*STALIBNAME/d' libcap/Makefile
+find man -name Makefile.in -exec sed -i 's/groups\.1 / /'   {} \;
+find man -name Makefile.in -exec sed -i 's/getspnam\.3 / /' {} \;
+find man -name Makefile.in -exec sed -i 's/passwd\.5 / /'   {} \;
+</code></pre>
+<p>Enable the use of the SHA-512 algorithm for password encryption:</p>
+<pre><code>sed -i -e 's@#ENCRYPT_METHOD DES@ENCRYPT_METHOD SHA512@' etc/login.defs
+</code></pre>
+<p>Change the location of user mailboxes from <code>/var/spool/mail</code> to <code>/var/mail</code>:</p>
+<pre><code>sed -i  -e 's@/var/spool/mail@/var/mail@' etc/login.defs
+</code></pre>
+<p>This amendment renders the 'user add' binary consistent with BROOT:</p>
+<pre><code>sed -i 's/1000/999/' etc/useradd
+</code></pre>
+<h4 id="configure-24">Configure</h4>
+<pre><code>./configure --sysconfdir=/etc --with-group-name-max-length=32
+</code></pre>
+<h4 id="compile-and-install-14">Compile and Install</h4>
+<pre><code>make &amp;&amp; make install
+</code></pre>
+<p>Move a misplaced binary to its proper location:</p>
+<pre><code>mv -v /usr/bin/passwd /bin
+</code></pre>
+<h4 id="post-install-configuration">Post-install Configuration</h4>
+<p>To enable shadowed passwords, run the following command:</p>
+<pre><code>pwconv
+</code></pre>
+<p>To enable shadowed groups, execute this command:</p>
+<pre><code>grpconv
+</code></pre>
+<p class="return"><a href="index.html">Back to top</a></p>
+<h3 id="set-the-root-password">Set the root Password</h3>
+<p>Now that we've installed the <code>/etc/passwd</code> file and the utilities to manage passwords, change the <em>root</em> password.</p>
+<p>If you receive an error message about <em>root</em> not existing in <code>/etc/passwd</code>, there is likely a problem with the file.</p>
+<p class="return"><a href="index.html">Back to top</a></p>
+<h3 id="installing-psmisc">Installing psmisc</h3>
+<p>This package does not require the use of a build directory.</p>
+<h4 id="configure-25">Configure</h4>
+<pre><code>./configure --prefix=/usr
+</code></pre>
+<h4 id="compile-16">Compile</h4>
+<pre><code>make 
+</code></pre>
+<h4 id="install-20">Install</h4>
+<pre><code>make install 
+</code></pre>
+<h4 id="move">Move</h4>
+<p>Move the 'killall' and 'fuser' binaries to FHS-compliant locations:</p>
+<pre><code>mv -v /usr/bin/fuser   /bin
+mv -v /usr/bin/killall /bin
+</code></pre>
+<p class="return"><a href="index.html">Back to top</a></p>
+<h3 id="installing-iana-etc">Installing IANA-etc</h3>
+<p>This package does not require the use of a build directory.</p>
+<h4 id="configure-26">Configure</h4>
+<p>This package does not make use of a configuration script.</p>
+<h4 id="compile-17">Compile</h4>
+<pre><code>make 
+</code></pre>
+<h4 id="install-21">Install</h4>
+<pre><code>make install 
+</code></pre>
+<p class="return"><a href="index.html">Back to top</a></p>
+<h3 id="installing-m4">Installing M4</h3>
+<p>This package does not require the use of a build directory.</p>
+<h4 id="configure-27">Configure</h4>
+<pre><code>./configure --prefix=/usr
+</code></pre>
+<h4 id="compile-18">Compile</h4>
+<pre><code>make 
+</code></pre>
+<h4 id="test-11">Test</h4>
+<p>M4 may fail the 'test-update-copyright' test; you check this by using <code>cat</code> to check the contents of <code>tests/test-suite.log</code>.</p>
+<pre><code>make check
+</code></pre>
+<h4 id="install-22">Install</h4>
+<pre><code>make install 
+</code></pre>
+<p class="return"><a href="index.html">Back to top</a></p>
+<h3 id="installing-bison">Installing bison</h3>
+<p>This package does not require the use of a build directory.</p>
+<h4 id="configure-28">Configure</h4>
+<pre><code>./configure --prefix=/usr --docdir=/usr/share/doc/bison-3.0.4
+</code></pre>
+<h4 id="compile-19">Compile</h4>
+<pre><code>make 
+</code></pre>
+<h4 id="install-23">Install</h4>
+<pre><code>make install 
+</code></pre>
+<p class="return"><a href="index.html">Back to top</a></p>
+<h3 id="installing-flex">Installing flex</h3>
+<p>This package does not require the use of a build directory.</p>
+<h4 id="configure-29">Configure</h4>
+<pre><code>./configure --prefix=/usr --docdir=/usr/share/doc/flex-2.6.1
+</code></pre>
+<h4 id="compile-20">Compile</h4>
+<pre><code>make 
+</code></pre>
+<h4 id="install-24">Install</h4>
+<pre><code>make install 
+</code></pre>
+<h4 id="compatibility-symlink">Compatibility Symlink</h4>
+<p><code>flex</code> is predated by a software package by the name of <code>lex</code>. Some user-land binaries may be expecting <code>lex</code> to be installed, and may not call <code>flex</code>. However, this software package does provide for the emulation of <code>lex</code> using a symlink:</p>
+<pre><code>ln -sv flex /usr/bin/lex
+</code></pre>
+<p class="return"><a href="index.html">Back to top</a></p>
+<h3 id="installing-grep">Installing grep</h3>
+<p>This package does not require the use of a build directory.</p>
+<h4 id="configure-30">Configure</h4>
+<pre><code>./configure --prefix=/usr --bindir=/bin
+</code></pre>
+<h4 id="compile-21">Compile</h4>
+<pre><code>make 
+</code></pre>
+<h4 id="test-12">Test</h4>
+<pre><code>make check
+</code></pre>
+<h4 id="install-25">Install</h4>
+<pre><code>make install 
+</code></pre>
+<p class="return"><a href="index.html">Back to top</a></p>
+<h3 id="installing-readline">Installing readline</h3>
+<p>This package does not require the use of a build directory. Be sure to start with a fresh source directory extracted from the tar file.</p>
+<h4 id="patch-and-amend-the-source-2">Patch and Amend the Source</h4>
+<p>Change to the readline source directory, and run the following command to patch the source:</p>
+<pre><code>patch -Np1 -i ../readline-6.3-upstream_fixes-3.patch
+</code></pre>
+<p>Reinstalling this package results in old libraries being moved, with the suffix <code>.old</code> attached to their filename. This can trigger bugs in <code>ldconfig</code>. We can avoid this behavior by removing the renaming:</p>
+<pre><code>sed -i '/MV.*old/d' Makefile.in
+sed -i '/{OLDSUFF}/c:' support/shlib-install
+</code></pre>
+<h4 id="configure-31">Configure</h4>
+<pre><code>./configure --prefix=/usr  --disable-static --docdir=/usr/share/doc/readline-6.3
+</code></pre>
+<h4 id="compile-and-install-15">Compile and Install</h4>
+<pre><code>make SHLIB_LIBS=-lncurses
+make SHLIB_LIBS=-lncurses install
+</code></pre>
+<h4 id="copy-the-shared-binary-into-the-appropriate-directory-and-make-symbolic-links-2">Copy the Shared Binary into the Appropriate Directory and Make Symbolic Links:</h4>
+<pre><code>mv -v /usr/lib/lib{readline,history}.so.* /lib
+ln -sfv ../../lib/$(readlink /usr/lib/libreadline.so) /usr/lib/libreadline.so
+ln -sfv ../../lib/$(readlink /usr/lib/libhistory.so ) /usr/lib/libhistory.so
+</code></pre>
+<h4 id="install-the-documentation">Install the Documentation</h4>
+<pre><code>install -v -m644 doc/*.{ps,pdf,html,dvi} /usr/share/doc/readline-6.3
+</code></pre>
+<p class="return"><a href="index.html">Back to top</a></p>
+<h3 id="installing-bash">Installing bash</h3>
+<p>This package does not require the use of a build directory. Be sure to start with a fresh source directory extracted from the tar file.</p>
+<h4 id="patch-2">Patch</h4>
+<pre><code>patch -Np1 -i ../bash-4.3.30-upstream_fixes-3.patch
+</code></pre>
+<h4 id="configure-32">Configure</h4>
+<pre><code>./configure --prefix=/usr --docdir=/usr/share/doc/bash-4.3.30 --without-bash-malloc --with-installed-readline
+</code></pre>
+<h4 id="compile-22">Compile</h4>
+<pre><code>make
+</code></pre>
+<h4 id="test-13">Test</h4>
+<p>First, we need to change the permissions on the source tree so that the <em>nobody</em> user can write:</p>
+<pre><code>chown -Rv nobody
+</code></pre>
+<p>Now, execute the tests as the <em>nobody</em> user:</p>
+<pre><code>su nobody -s /bin/bash -c "PATH=$PATH make tests"
+</code></pre>
+<h4 id="install-26">Install</h4>
+<pre><code>make install
+mv -vf /usr/bin/bash /bin
+</code></pre>
+<h4 id="to-use-the-newly-installed-bash">To Use the Newly Installed bash:</h4>
+<pre><code>exec /bin/bash --login +h
+</code></pre>
+<p class="return"><a href="index.html">Back to top</a></p>
+<h3 id="installing-bc">Installing bc</h3>
+<p>This package does not require the use of a build directory.</p>
+<h4 id="patch-3">Patch</h4>
+<pre><code>patch -Np1 -i ../bc-1.06.95-memory_leak-1.patch
+</code></pre>
+<h4 id="configure-33">Configure</h4>
+<pre><code>./configure --prefix=/usr --with-readline --mandir=/usr/share/man --infodir=/usr/share/info
+</code></pre>
+<h4 id="compile-23">Compile</h4>
+<pre><code>make 
+</code></pre>
+<h4 id="test-14">Test</h4>
+<pre><code>echo "quit" | ./bc/bc -l Test/checklib.b
+</code></pre>
+<h4 id="install-27">Install</h4>
+<pre><code>make install 
+</code></pre>
+<p class="return"><a href="index.html">Back to top</a></p>
+<h3 id="installing-lib-tool">Installing lib tool</h3>
+<p>This package does not require the use of a build directory.</p>
+<h4 id="configure-34">Configure</h4>
+<pre><code>./configure --prefix=/usr 
+</code></pre>
+<h4 id="compile-24">Compile</h4>
+<pre><code>make 
+</code></pre>
+<h4 id="test-15">Test</h4>
+<p>Libtool will fail several tests, due to unmet dependencies on the <code>automake</code> package.</p>
+<pre><code>make check
+</code></pre>
+<h4 id="install-28">Install</h4>
+<pre><code>make install 
+</code></pre>
+<p class="return"><a href="index.html">Back to top</a></p>
+<h3 id="installing-gbdm">Installing GBDM</h3>
+<p>This package does not require the use of a build directory.</p>
+<h4 id="configure-35">Configure</h4>
+<pre><code>./configure --prefix=/usr --disable-static --enable-libgdbm-compat
+</code></pre>
+<h4 id="compile-25">Compile</h4>
+<pre><code>make 
+</code></pre>
+<h4 id="test-16">Test</h4>
+<pre><code>make check
+</code></pre>
+<h4 id="install-29">Install</h4>
+<pre><code>make install 
+</code></pre>
+<p class="return"><a href="index.html">Back to top</a></p>
+<h3 id="installing-gperf">Installing Gperf</h3>
+<p>This package does not require the use of a build directory.</p>
+<h4 id="configure-36">Configure</h4>
+<pre><code>./configure --prefix=/usr --docdir=/usr/share/doc/gperf-3.0.4
+</code></pre>
+<h4 id="compile-26">Compile</h4>
+<pre><code>make 
+</code></pre>
+<h4 id="test-17">Test</h4>
+<pre><code>make -j1 check
+</code></pre>
+<h4 id="install-30">Install</h4>
+<pre><code>make install 
+</code></pre>
+<p class="return"><a href="index.html">Back to top</a></p>
+<h3 id="installing-expat">Installing expat</h3>
+<p>This package does not require the use of a build directory.</p>
+<h4 id="configure-37">Configure</h4>
+<pre><code>./configure --prefix=/usr --disable-static
+</code></pre>
+<h4 id="compile-27">Compile</h4>
+<pre><code>make 
+</code></pre>
+<h4 id="test-18">Test</h4>
+<pre><code>make check
+</code></pre>
+<h4 id="install-31">Install</h4>
+<pre><code>make install 
+install -v -dm755 /usr/share/doc/expat-2.2.0
+install -v -m644 doc/*.{html,png,css} /usr/share/doc/expat-2.2.0
+</code></pre>
+<p class="return"><a href="index.html">Back to top</a></p>
+<h3 id="installing-inetutils">Installing inetutils</h3>
+<p>This package does not require the use of a build directory.</p>
+<h4 id="configure-38">Configure</h4>
+<pre><code>./configure --prefix=/usr --localstatedir=/var --disable-logger  --disable-whois --disable-rcp  --disable-rexec  --disable-rlogin --disable-rsh  --disable-servers
+</code></pre>
+<ul>
+<li><code>disable-logger</code> :: This prevents the installation of the logger program; this same program is provided (albeit, a more recent version) by the <code>util-linux</code> package.</li>
+<li><code>disable-whois</code> :: Disables the building of the <code>whois</code> client.</li>
+<li><code>disable-rcp/rexec/rlogin/rsh</code> :: Disables the building of obsolete programs whose functionality has been replaced by OpenSSH.</li>
+<li><code>disable-servers</code> :: This disables the installation of a number of network services included in the package. Most of these are insecure.</li>
+</ul>
+<h4 id="compile-28">Compile</h4>
+<pre><code>make 
+</code></pre>
+<h4 id="test-19">Test</h4>
+<pre><code>make check
+</code></pre>
+<h4 id="install-32">Install</h4>
+<pre><code>make install 
+mv -v /usr/bin/{hostname,ping,ping6,traceroute} /bin
+mv -v /usr/bin/ifconfig /sbin
+</code></pre>
+<p class="return"><a href="index.html">Back to top</a></p>
+<h3 id="installing-perl">Installing PERL</h3>
+<p>This package does not require the use of a build directory. Be sure to start with a fresh source directory extracted from the tar file.</p>
+<h4 id="pre-configuration">Pre-configuration</h4>
+<p>Install the <code>/etc/hosts</code> file, which is required by PERL's configuration files:</p>
+<pre><code>echo -e "127.0.0.1\tlocalhost\t$(hostname)" &gt; /etc/hosts
+</code></pre>
+<p>Export the following variables:</p>
+<pre><code>export BUILD_ZLIB=False
+export BUILD_BZIP2=0
+</code></pre>
+<h4 id="configure-39">Configure</h4>
+<p>PERL uses a special configuration script, as we saw previously:</p>
+<pre><code>sh Configure -des -Dprefix=/usr -Dvendorprefix=/usr -Dman1dir=/usr/share/man/man1 -Dman3dir=/usr/share/man/man3 -Dpager="/usr/bin/less -isR" -Duseshrplib
+</code></pre>
+<ul>
+<li><code>Dvendorprefix=/usr</code> :: Notifies PERL where packages should install their PERL modules.</li>
+<li><code>Dpager="/usr/bin/less -isR"</code> :: Instructs PERL to use <code>less</code> as a pager instead of <code>more</code>.</li>
+<li><code>Dman3dir=/usr/share/man/man3</code> :: PERL depends on <code>groff</code>, which is not installed yet. This directive instructs <code>make</code> to build man pages anyway.</li>
+<li><code>Duseshrplib</code> :: Build a shared library.</li>
+</ul>
+<h4 id="make-3">Make</h4>
+<pre><code>make
+</code></pre>
+<h4 id="test-20">Test</h4>
+<pre><code>make -k test
+</code></pre>
+<h4 id="install-33">Install</h4>
+<pre><code>make install
+</code></pre>
+<h4 id="cleanup-3">Cleanup</h4>
+<pre><code>unset BUILD_ZLIB BUILD_BZIP2
+</code></pre>
+<p class="return"><a href="index.html">Back to top</a></p>
+<h3 id="installing-xmlparser">Installing XML::Parser</h3>
+<p>This is a PERL module which incorporates the functionality of the expat binary into PERL.</p>
+<h4 id="configuration-2">Configuration</h4>
+<pre><code>perl Makefile.PL
+</code></pre>
+<h4 id="compile-29">Compile</h4>
+<pre><code>make
+</code></pre>
+<h4 id="test-21">Test</h4>
+<pre><code>make test
+</code></pre>
+<h4 id="install-34">Install</h4>
+<pre><code>make install
+</code></pre>
+<p class="return"><a href="index.html">Back to top</a></p>
+<h3 id="installing-intltool">Installing intltool</h3>
+<p>This package does not require the use of a build directory.</p>
+<h4 id="amend-the-source-6">Amend the Source</h4>
+<p>PERL version 5.22 and up throw a warning unless the source is amended as follows:</p>
+<pre><code>sed -i 's:\\\${:\\\$\\{:' intltool-update.in
+</code></pre>
+<h4 id="configuration-3">Configuration</h4>
+<pre><code>./configure --prefix=/usr
+</code></pre>
+<h4 id="compile-30">Compile</h4>
+<pre><code>make
+</code></pre>
+<h4 id="test-22">Test</h4>
+<pre><code>make check
+</code></pre>
+<h4 id="install-35">Install</h4>
+<pre><code>make install
+install -v -Dm644 doc/I18N-HOWTO /usr/share/doc/intltool-0.51.0/I18N-HOWTO
+</code></pre>
+<p class="return"><a href="index.html">Back to top</a></p>
+<h3 id="installing-autoconf">Installing autoconf</h3>
+<p>This package does not require the use of a build directory.</p>
+<h4 id="configuration-4">Configuration</h4>
+<pre><code>./configure --prefix=/usr
+</code></pre>
+<h4 id="compile-31">Compile</h4>
+<pre><code>make
+</code></pre>
+<h4 id="test-23">Test</h4>
+<pre><code>make check
+</code></pre>
+<h4 id="install-36">Install</h4>
+<pre><code>make install
+</code></pre>
+<p class="return"><a href="index.html">Back to top</a></p>
+<h3 id="installing-automake">Installing automake</h3>
+<p>This package does not require the use of a build directory.</p>
+<h4 id="amend-the-source-code">Amend the Source Code</h4>
+<p>This fixes warnings thrown by PERL 5.22 and above.</p>
+<pre><code>sed -i 's:/\\\${:/\\\$\\{:' bin/automake.in
+</code></pre>
+<h4 id="configuration-5">Configuration</h4>
+<pre><code>./configure --prefix=/usr --docdir=/usr/share/doc/automake-1.15
+</code></pre>
+<h4 id="compile-32">Compile</h4>
+<pre><code>make
+</code></pre>
+<h4 id="test-24">Test</h4>
+<p>Some of the tests link to the wrong version of flex; we use the sed command to fix this:</p>
+<pre><code>sed -i "s:./configure:LEXLIB=/usr/lib/libfl.a &amp;:" t/lex-{clean,depend}-cxx.sh
+make -j2 check
+</code></pre>
+<h4 id="install-37">Install</h4>
+<pre><code>make install
+</code></pre>
+<p class="return"><a href="index.html">Back to top</a></p>
+<h3 id="installing-xz">Installing xz</h3>
+<p>This package does not require the use of a build directory.</p>
+<h4 id="amend-the-source-code-2">Amend the Source Code</h4>
+<p>This fixes warnings thrown by PERL 5.22 and above.</p>
+<pre><code>sed -e '/mf\.buffer = NULL/a next-&gt;coder-&gt;mf.size = 0;' -i src/liblzma/lz/lz_encoder.c
+</code></pre>
+<h4 id="configuration-6">Configuration</h4>
+<pre><code>./configure --prefix=/usr --disable-static --docdir=/usr/share/doc/xz-5.2.
+</code></pre>
+<h4 id="compile-33">Compile</h4>
+<pre><code>make
+</code></pre>
+<h4 id="test-25">Test</h4>
+<pre><code>make check
+</code></pre>
+<h4 id="install-38">Install</h4>
+<pre><code>make install
+mv -v   /usr/bin/{lzma,unlzma,lzcat,xz,unxz,xzcat} /bin
+mv -v /usr/lib/liblzma.so.* /lib
+ln -svf ../../lib/$(readlink /usr/lib/liblzma.so) /usr/lib/liblzma.so
+</code></pre>
+<p class="return"><a href="index.html">Back to top</a></p>
+<h3 id="installing-kmod">Installing kmod</h3>
+<p>This package does not require the use of a build directory.</p>
+<h4 id="configuration-7">Configuration</h4>
+<pre><code>./configure --prefix=/usr --bindir=/bin --sysconfdir=/etc --with-rootlibdir=/lib --with-xz --with-zlib
+</code></pre>
+<h4 id="compile-34">Compile</h4>
+<pre><code>make
+</code></pre>
+<h4 id="install-39">Install</h4>
+<p>We create symlinks here, which provide backwards compatibility with the module-init tools, which previously provided loadable module support for the kernel.</p>
+<pre><code>make install
+for target in depmod insmod lsmod modinfo modprobe rmmod; do
+  ln -sfv ../bin/kmod /sbin/$target
+done
+ln -sfv kmod /bin/lsmod
+</code></pre>
+<p class="return"><a href="index.html">Back to top</a></p>
+<h3 id="installing-gettext">Installing gettext</h3>
+<p>This package does not require the use of a build directory. Be sure to start with a fresh source directory extracted from the tar file.</p>
+<h4 id="configuration-8">Configuration</h4>
+<pre><code>./configure --prefix=/usr --disable-static --docdir=/usr/share/doc/gettext-0.19.8.1
+</code></pre>
+<h4 id="compile-35">Compile</h4>
+<pre><code>make
+</code></pre>
+<h4 id="test-26">Test</h4>
+<pre><code>make check
+</code></pre>
+<h4 id="install-40">Install</h4>
+<pre><code>make install
+chmod -v 0755 /usr/lib/preloadable_libintl.so
+</code></pre>
+<p class="return"><a href="index.html">Back to top</a></p>
+<h3 id="installing-procps-ng">Installing procps-ng</h3>
+<p>This package does not require the use of a build directory.</p>
+<h4 id="configuration-9">Configuration</h4>
+<pre><code>./configure --prefix=/usr --exec-prefix= --libdir=/usr/lib --docdir=/usr/share/doc/procps-ng-3.3.12 --disable-static --disable-kill
+</code></pre>
+<h4 id="compile-36">Compile</h4>
+<pre><code>make
+</code></pre>
+<h4 id="test-27">Test</h4>
+<p>We need to modify the test code so that it does not rely on the presence of a tty device; otherwise, some tests will fail:</p>
+<pre><code>sed -i -r 's|(pmap_initname)\\\$|\1|' testsuite/pmap.test/pmap.exp
+make check
+</code></pre>
+<h4 id="install-41">Install</h4>
+<pre><code>make install
+mv -v /usr/lib/libprocps.so.* /lib
+ln -sfv ../../lib/$(readlink /usr/lib/libprocps.so) /usr/lib/libprocps.so
+</code></pre>
+<p class="return"><a href="index.html">Back to top</a></p>
+<h3 id="installing-e2fsprogs">Installing e2fsprogs</h3>
+<p>This package <em>does</em> require the use of a <code>build</code> directory like binutils, GCC and glibc.</p>
+<h4 id="amend-the-source-7">Amend the Source</h4>
+<p>We amend one of the test scripts here:</p>
+<pre><code>sed -i -e 's:\[\.-\]::' tests/filter.sed
+</code></pre>
+<h4 id="configure-40">Configure</h4>
+<p>The environment variables defined here instruct <code>configure</code> to look for libraries in the specified locations:</p>
+<pre><code>export LIBS=-L/tools/lib 
+export CFLAGS=-I/tools/include 
+export PKG_CONFIG_PATH=/tools/lib/pkgconfig
+../configure --prefix=/usr --bindir=/bin --with-root-prefix="" --enable-elf-shlibs --disable-libblkid --disable-libuuid --disable-uuidd --disable-fsck
+</code></pre>
+<ul>
+<li><code>bindir=/bin</code> :: Ensure that the compiled binaries are installed in <code>/lib</code> and <code>/sbin</code>.</li>
+<li><code>enable-elf-shlibs</code> :: Creates shared libraries used by the binaries installed as part of the package.</li>
+<li><code>disable</code> :: Prevents the installation of the specified libraries, as more recent versions are installed by the <code>util-linux</code> package.</li>
+</ul>
+<h4 id="compile-37">Compile</h4>
+<pre><code>make
+</code></pre>
+<h4 id="test-28">Test</h4>
+<p>For the tests to run properly, we need to link some shared libraries to a place where the tests can find them:</p>
+<pre><code>ln -sfv /tools/lib/lib{blk,uu}id.so.1 lib
+make LD_LIBRARY_PATH=/tools/lib check
+</code></pre>
+<h4 id="install-42">Install</h4>
+<pre><code>make install
+make install-libs
+chmod -v u+w /usr/lib/{libcom_err,libe2p,libext2fs,libss}.a
+gunzip -v /usr/share/info/libext2fs.info.gz
+install-info --dir-file=/usr/share/info/dir /usr/share/info/libext2fs.info
+makeinfo -o      doc/com_err.info ../lib/et/com_err.texinfo
+install -v -m644 doc/com_err.info /usr/share/info
+install-info --dir-file=/usr/share/info/dir /usr/share/info/com_err.info
+</code></pre>
+<h4 id="cleanup-4">Cleanup</h4>
+<p><strong>DO NOT FORGET TO UNSET THESE ENVIRONMENT VARIABLES!</strong></p>
+<pre><code>unset LIBS CFLAGS PKG_CONFIG_PATH
+</code></pre>
+<p class="return"><a href="index.html">Back to top</a></p>
+<h3 id="installing-coreutils">Installing coreutils</h3>
+<p>This package does not require the use of a build directory. Be sure to start with a fresh source directory extracted from the tar file.</p>
+<h4 id="patch-the-source">Patch the Source</h4>
+<pre><code>patch -Np1 -i ../coreutils-8.25-i18n-2.patch
+</code></pre>
+<h4 id="configure-41">Configure</h4>
+<p>The variable defined here allows <code>coreutils</code> to be built as root:</p>
+<pre><code>FORCE_UNSAFE_CONFIGURE=1 ./configure --prefix=/usr --enable-no-install-program=kill,uptime
+</code></pre>
+<ul>
+<li><code>enable-no-install-program</code> :: Prevents the installation of binaries which will be installed by other packages.</li>
+</ul>
+<h4 id="compile-38">Compile</h4>
+<pre><code>FORCE_UNSAFE_CONFIGURE=1 make
+</code></pre>
+<h4 id="test-29">Test</h4>
+<p>For the tests to run properly, we need to link some shared libraries to a place where the tests can find them:</p>
+<pre><code>make NON_ROOT_USERNAME=nobody check-root
+</code></pre>
+<p>Some tests must be run as the <em>nobody</em> user, and require the user be part of more than one group:</p>
+<pre><code>echo "dummy:x:1000:nobody" &gt;&gt; /etc/group
+</code></pre>
+<p>Change the permissions so the tests can be run by the <em>nobody</em> user:</p>
+<pre><code>chown -Rv nobody . 
+</code></pre>
+<p>And now we run the remainder of the tests:</p>
+<pre><code>su nobody -s /bin/bash  -c "PATH=$PATH make RUN_EXPENSIVE_TESTS=yes check"
+</code></pre>
+<h4 id="install-43">Install</h4>
+<pre><code>make install
+mv -v /usr/bin/{cat,chgrp,chmod,chown,cp,date,dd,df,echo} /bin
+mv -v /usr/bin/{false,ln,ls,mkdir,mknod,mv,pwd,rm} /bin
+mv -v /usr/bin/{rmdir,stty,sync,true,uname} /bin
+mv -v /usr/bin/chroot /usr/sbin
+mv -v /usr/share/man/man1/chroot.1 /usr/share/man/man8/chroot.8
+sed -i s/\"1\"/\"8\"/1 /usr/share/man/man8/chroot.8
+mv -v /usr/bin/{head,sleep,nice,test,[} /bin
+</code></pre>
+<h4 id="cleanup-5">Cleanup</h4>
+<p>Remove the <em>dummy</em> group we created for testing:</p>
+<pre><code>sed -i '/dummy/d' /etc/group
+</code></pre>
+<p class="return"><a href="index.html">Back to top</a></p>
+<h3 id="installing-diffutils">Installing Diffutils</h3>
+<p>This package does not require the use of a build directory. Be sure to start with a fresh source directory extracted from the tar file.</p>
+<h4 id="amend-the-source-8">Amend the Source</h4>
+<p>We need to amend the makefiles so that the locale files are installed:</p>
+<pre><code>sed -i 's:= @mkdir_p@:= /bin/mkdir -p:' po/Makefile.in.in
+</code></pre>
+<h4 id="configure-42">Configure</h4>
+<pre><code>./configure --prefix=/usr
+</code></pre>
+<h4 id="compile-39">Compile</h4>
+<pre><code>make
+</code></pre>
+<h4 id="test-30">Test</h4>
+<p>The <code>test-update-copyright</code> failure is expected.</p>
+<pre><code>make test
+</code></pre>
+<h4 id="install-44">Install</h4>
+<pre><code>make install
+</code></pre>
+<p class="return"><a href="index.html">Back to top</a></p>
+<h3 id="installing-gawk">Installing gawk</h3>
+<p>This package does not require the use of a build directory. Be sure to start with a fresh source directory extracted from the tar file.</p>
+<h4 id="configure-43">Configure</h4>
+<pre><code>./configure --prefix=/usr
+</code></pre>
+<h4 id="compile-40">Compile</h4>
+<pre><code>make
+</code></pre>
+<h4 id="check-2">Check</h4>
+<pre><code>make check
+</code></pre>
+<h4 id="install-45">Install</h4>
+<pre><code>make install
+</code></pre>
+<h4 id="install-documentation">Install Documentation</h4>
+<pre><code>mkdir -v /usr/share/doc/gawk-4.1.3
+cp    -v doc/{awkforai.txt,*.{eps,pdf,jpg}} /usr/share/doc/gawk-4.1.3
+</code></pre>
+<p class="return"><a href="index.html">Back to top</a></p>
+<h3 id="installing-findutils">Installing findutils</h3>
+<p>This package does not require the use of a build directory. Be sure to start with a fresh source directory extracted from the tar file.</p>
+<h4 id="configure-44">Configure</h4>
+<pre><code>./configure --prefix=/usr --localstatedir=/var/lib/locate
+</code></pre>
+<h4 id="compile-41">Compile</h4>
+<pre><code>make
+</code></pre>
+<h4 id="test-31">Test</h4>
+<pre><code>make check
+</code></pre>
+<h4 id="install-46">Install</h4>
+<pre><code>make install
+mv -v /usr/bin/find /bin
+sed -i 's|find:=${BINDIR}|find:=/bin|' /usr/bin/updatedb
+</code></pre>
+<p class="return"><a href="index.html">Back to top</a></p>
+<h3 id="installing-groff">Installing groff</h3>
+<h4 id="configuration-10">Configuration</h4>
+<p>The <code>gruff</code> binary expects to find a "PAGE" variable in the environment which defines the default page size. This is normally stored in <code>/etc/papersize</code>; we provide a value on the command-line here.</p>
+<pre><code>export PAGE=letter
+./configure --prefix=/usr
+</code></pre>
+<h4 id="build">Build</h4>
+<pre><code>make
+</code></pre>
+<h4 id="install-47">Install</h4>
+<pre><code>make install
+</code></pre>
+<p class="return"><a href="index.html">Back to top</a></p>
+<h3 id="installing-grub">Installing GRUB</h3>
+<h4 id="configure-45">Configure</h4>
+<pre><code>./configure --prefix=/usr --sbindir=/sbin --sysconfdir=/etc --disable-efiemu --disable-werror
+</code></pre>
+<ul>
+<li><code>disable-efiemu</code> :: Disables EFI emulation and testing.</li>
+</ul>
+<h4 id="compile-42">Compile</h4>
+<pre><code>make
+</code></pre>
+<h4 id="install-48">Install</h4>
+<pre><code>make install
+</code></pre>
+<p class="return"><a href="index.html">Back to top</a></p>
+<h3 id="installing-less">Installing less</h3>
+<p>This package does not require the use of a build directory. Be sure to start with a fresh source directory extracted from the tar file.</p>
+<h4 id="configure-46">Configure</h4>
+<pre><code>./configure --prefix=/usr --sysconfdir=/etc
+</code></pre>
+<h4 id="compile-43">Compile</h4>
+<pre><code>make
+</code></pre>
+<h4 id="install-49">Install</h4>
+<pre><code>make install
+</code></pre>
+<p class="return"><a href="index.html">Back to top</a></p>
+<h3 id="installing-gzip">Installing gzip</h3>
+<p>This package does not require the use of a build directory. Be sure to start with a fresh source directory extracted from the tar file.</p>
+<h4 id="configure-47">Configure</h4>
+<pre><code>./configure --prefix=/usr
+</code></pre>
+<h4 id="compile-44">Compile</h4>
+<pre><code>make
+</code></pre>
+<h4 id="test-32">Test</h4>
+<pre><code>make check
+</code></pre>
+<h4 id="install-50">Install</h4>
+<pre><code>make install
+mv -v /usr/bin/gzip /bin
+</code></pre>
+<p class="return"><a href="index.html">Back to top</a></p>
+<h3 id="installing-iproute2">Installing iproute2</h3>
+<p>This package does not require the use of a build directory.</p>
+<h4 id="amend-the-source-9">Amend the Source</h4>
+<p>We amend the source here to remove a dependency on Berkeley DB, which is not installed.</p>
+<pre><code>sed -i /ARPD/d Makefile
+sed -i 's/arpd.8//' man/man8/Makefile
+rm -v doc/arpd.sgml
+</code></pre>
+<p>This command removes a dependency on <code>iptables</code>:</p>
+<pre><code>sed -i 's/m_ipt.o//' tc/Makefile
+</code></pre>
+<h4 id="configure-48">Configure</h4>
+<p>There is no separate configure step.</p>
+<h4 id="compile-45">Compile</h4>
+<pre><code>make
+</code></pre>
+<h4 id="install-51">Install</h4>
+<pre><code>make DOCDIR=/usr/share/doc/iproute2-4.7.0 install
+</code></pre>
+<p class="return"><a href="index.html">Back to top</a></p>
+<h3 id="installing-kbd">Installing kbd</h3>
+<p>This package does not require the use of a build directory.</p>
+<h4 id="patch-and-amend-the-source-3">Patch and Amend the Source</h4>
+<pre><code>patch -Np1 -i ../kbd-2.0.3-backspace-1.patch
+</code></pre>
+<p>The following commands ensure the <code>resizecons</code> binary is not built:</p>
+<pre><code>sed -i 's/\(RESIZECONS_PROGS=\)yes/\1no/g' configure
+sed -i 's/\(RESIZECONS_PROGS=\)yes/\1no/g' configure
+</code></pre>
+<h4 id="configure-49">Configure</h4>
+<pre><code>PKG_CONFIG_PATH=/tools/lib/pkgconfig ./configure --prefix=/usr --disable-vlock
+</code></pre>
+<ul>
+<li><code>disable-block</code> :: Prevents the vlock utility from being built as it depends on the PAM library, which we have not installed.</li>
+</ul>
+<h4 id="compile-46">Compile</h4>
+<pre><code>make
+</code></pre>
+<h4 id="test-33">Test</h4>
+<pre><code>make check
+</code></pre>
+<h4 id="install-52">Install</h4>
+<pre><code>make install
+mkdir -v       /usr/share/doc/kbd-2.0.3
+cp -R -v docs/doc/* /usr/share/doc/kbd-2.0.3
+</code></pre>
+<p class="return"><a href="index.html">Back to top</a></p>
+<h3 id="installing-libpipeline">Installing libpipeline</h3>
+<p>This package does not require the use of a build directory.</p>
+<h4 id="configure-50">Configure</h4>
+<pre><code>PKG_CONFIG_PATH=/tools/lib/pkgconfig ./configure --prefix=/usr
+</code></pre>
+<h4 id="compile-47">Compile</h4>
+<pre><code>make
+</code></pre>
+<h4 id="test-34">Test</h4>
+<pre><code>make check
+</code></pre>
+<h4 id="install-53">Install</h4>
+<pre><code>make install
+</code></pre>
+<p class="return"><a href="index.html">Back to top</a></p>
+<h3 id="installing-make">Installing make</h3>
+<p>This package does not require the use of a build directory.</p>
+<h4 id="configure-51">Configure</h4>
+<pre><code>./configure --prefix=/usr 
+</code></pre>
+<h4 id="compile-48">Compile</h4>
+<pre><code>make
+</code></pre>
+<h4 id="test-35">Test</h4>
+<pre><code>make check
+</code></pre>
+<h4 id="install-54">Install</h4>
+<pre><code>make install
+</code></pre>
+<p class="return"><a href="index.html">Back to top</a></p>
+<h3 id="installing-patch">Installing patch</h3>
+<p>This package does not require the use of a build directory. Be sure to start with a fresh source directory extracted from the tar file.</p>
+<h4 id="configure-52">Configure</h4>
+<pre><code>./configure --prefix=/usr 
+</code></pre>
+<h4 id="compile-49">Compile</h4>
+<pre><code>make
+</code></pre>
+<h4 id="test-36">Test</h4>
+<pre><code>make check
+</code></pre>
+<h4 id="install-55">Install</h4>
+<pre><code>make install
+</code></pre>
+<p class="return"><a href="index.html">Back to top</a></p>
+<h3 id="installing-sysklogd">Installing sysklogd</h3>
+<p>This package does not require the use of a build directory.</p>
+<h4 id="amend-the-source-10">Amend the Source</h4>
+<p>The following commands address problems that cause <code>sysklogd</code> to segment fault, as well as remove a reference to an obsolete data structure:</p>
+<pre><code>sed -i '/Error loading kernel symbols/{n;n;d}' ksym_mod.c
+sed -i 's/union wait/int/' syslogd.c
+</code></pre>
+<h4 id="configure-53">Configure</h4>
+<p>This package does not make use of a <code>configure</code> script.</p>
+<h4 id="compile-50">Compile</h4>
+<pre><code>make
+</code></pre>
+<h4 id="install-56">Install</h4>
+<pre><code>make BINDIR=/sbin install
+</code></pre>
+<h4 id="post-install-configuration-2">Post-install Configuration</h4>
+<p>Create <code>/etc/syslog.conf</code> with the following contents:</p>
+<pre><code>auth,authpriv.* -/var/log/auth.log
+*.*;auth,authpriv.none -/var/log/sys.log
+daemon.* -/var/log/daemon.log
+kern.* -/var/log/kern.log
+mail.* -/var/log/mail.log
+user.* -/var/log/user.log
+*.emerg *
+</code></pre>
+<p class="return"><a href="index.html">Back to top</a></p>
+<h3 id="install-sysvinit">Install sysvinit</h3>
+<p>This package does not require the use of a build directory.</p>
+<h4 id="patch-4">Patch</h4>
+<pre><code>patch -Np1 -i ../sysvinit-2.88dsf-consolidated-1.patch
+</code></pre>
+<h4 id="configure-54">Configure</h4>
+<p>This program does not make use of a <code>configure</code> script.</p>
+<h4 id="compile-51">Compile</h4>
+<pre><code>make -C src
+</code></pre>
+<h4 id="install-57">Install</h4>
+<pre><code>make -C src install
+</code></pre>
+<p class="return"><a href="index.html">Back to top</a></p>
+<h3 id="install-eudev">Install eudev</h3>
+<p>This package does not require the use of a build directory.</p>
+<h4 id="amend-the-source-11">Amend the Source</h4>
+<p>First, we need to amend one of the test scripts:</p>
+<pre><code>sed -r -i 's|/usr(/bin/test)|\1|' test/udev-test.pl
+</code></pre>
+<p>And now we prevent the <code>/tools</code> directory from being hard-coded as a library path into the binary; we do this by appending the following variables to the <code>config.cache</code> file:</p>
+<pre><code>cat &gt; config.cache &lt;&lt; "EOF"
+HAVE_BLKID=1
+BLKID_LIBS="-lblkid"
+BLKID_CFLAGS="-I/tools/include"
+EOF
+</code></pre>
+<h4 id="configure-55">Configure</h4>
+<pre><code>./configure --prefix=/usr --bindir=/sbin --sbindir=/sbin --libdir=/usr/lib --sysconfdir=/etc --libexecdir=/lib --with-rootprefix= --with-rootlibdir=/lib --enable-manpages --disable-static --config-cache 
+</code></pre>
+<h4 id="compile-52">Compile</h4>
+<pre><code>LIBRARY_PATH=/tools/lib make
+</code></pre>
+<h4 id="test-37">Test</h4>
+<p>First, we need to create some directories required by the testing scripts:</p>
+<pre><code>mkdir -pv /lib/udev/rules.d
+mkdir -pv /etc/udev/rules.d
+</code></pre>
+<p>And run the tests:</p>
+<pre><code>make LD_LIBRARY_PATH=/tools/lib check
+</code></pre>
+<h4 id="install-58">Install</h4>
+<pre><code>make LD_LIBRARY_PATH=/tools/lib install
+tar -xvf ../udev-BROOT-20140408.tar.bz2
+make -f udev-BROOT-20140408/Makefile.BROOT install
+</code></pre>
+<h4 id="post-install-configuration-3">Post-install Configuration</h4>
+<pre><code>LD_LIBRARY_PATH=/tools/lib udevadm hwdb --update
+</code></pre>
+<p class="return"><a href="index.html">Back to top</a></p>
+<h3 id="installing-util-linux">Installing util-linux</h3>
+<p>This package does not require the use of a build directory.</p>
+<h4 id="configuration-11">Configuration</h4>
+<p>As per FHS, we will use <code>/var/lib/hwclock</code> instead of <code>/etc</code> for our <code>daytime</code> file:</p>
+<pre><code>mkdir -pv /var/lib/hwclock
+</code></pre>
+<p>And now configure the package:</p>
+<pre><code>./configure ADJTIME_PATH=/var/lib/hwclock/adjtime --docdir=/usr/share/doc/util-linux-2.28.1 --disable-chfn-chsh --disable-login --disable-nologin --disable-su --disable-setpriv --disable-runuser --disable-pylibmount --disable-static --without-python --without-systemd --without-systemdsystemunitdir
+</code></pre>
+<h4 id="compile-53">Compile</h4>
+<pre><code>make
+</code></pre>
+<h4 id="test-38">Test</h4>
+<p>We do not run the tests for this package, as they will not run without specific kernel options. As well, some of these tests have been known to damage hardware.</p>
+<h4 id="install-59">Install</h4>
+<pre><code>make install
+</code></pre>
+<p class="return"><a href="index.html">Back to top</a></p>
+<h3 id="installing-man-db">Installing man-DB</h3>
+<p>This package does not require the use of a build directory.</p>
+<h4 id="configure-56">Configure</h4>
+<pre><code>./configure --prefix=/usr --docdir=/usr/share/doc/man-db-2.7.5 --sysconfdir=/etc --disable-setuid --with-browser=/usr/bin/lynx --with-vgrind=/usr/bin/vgrind --with-grap=/usr/bin/grap
+</code></pre>
+<h4 id="compile-54">Compile</h4>
+<pre><code>make
+</code></pre>
+<h4 id="test-39">Test</h4>
+<pre><code>make check
+</code></pre>
+<h4 id="install-60">Install</h4>
+<pre><code>make install
+</code></pre>
+<h4 id="post-install-configuration-4">Post-install Configuration:</h4>
+<p>Remove a reference to a non-existent user:</p>
+<pre><code>sed -i "s:man root:root root:g" /usr/lib/tmpfiles.d/man-db.conf
+</code></pre>
+<p class="return"><a href="index.html">Back to top</a></p>
+<h3 id="installing-tar">Installing tar</h3>
+<p>This package does not require the use of a build directory.</p>
+<h4 id="configure-57">Configure</h4>
+<p>We set the <code>FORCE_UNSAFE_CONFIGURE</code> variable here to allow compilation using the <em>root</em> account.</p>
+<pre><code>FORCE_UNSAFE_CONFIGURE=1 ./configure --prefix=/usr --bindir=/bin
+</code></pre>
+<h4 id="compile-55">Compile</h4>
+<pre><code>make
+</code></pre>
+<h4 id="test-40">Test</h4>
+<pre><code>make check
+</code></pre>
+<h4 id="install-61">Install</h4>
+<pre><code>make install
+make -C doc install-html docdir=/usr/share/doc/tar-1.29
+</code></pre>
+<p class="return"><a href="index.html">Back to top</a></p>
+<h3 id="installing-texinfo">Installing texinfo</h3>
+<p>This package does not require the use of a build directory.</p>
+<h4 id="configure-58">Configure</h4>
+<pre><code>./configure --prefix=/usr --disable-static
+</code></pre>
+<h4 id="compile-56">Compile</h4>
+<pre><code>make
+</code></pre>
+<h4 id="test-41">Test</h4>
+<pre><code>make check
+</code></pre>
+<h4 id="install-62">Install</h4>
+<pre><code>make install
+make TEXMF=/usr/share/texmf install-tex
+</code></pre>
+<p class="return"><a href="index.html">Back to top</a></p>
+<h3 id="installing-vim">Installing vim</h3>
+<p>This package does not require the use of a build directory.</p>
+<h4 id="amend-the-source-code-3">Amend the Source Code</h4>
+<p>We amend the source code so that the default location of the <code>vimrc</code> file is <code>/etc</code>:</p>
+<pre><code>echo '#define SYS_VIMRC_FILE "/etc/vimrc"' &gt;&gt; src/feature.h
+</code></pre>
+<h4 id="configure-59">Configure</h4>
+<pre><code>./configure --prefix=/usr
+</code></pre>
+<h4 id="compile-57">Compile</h4>
+<pre><code>make
+</code></pre>
+<h4 id="test-42">Test</h4>
+<pre><code>make -j1 test
+</code></pre>
+<h4 id="install-63">Install</h4>
+<pre><code>make install
+</code></pre>
+<h4 id="post-install-configuration-5">Post-install Configuration</h4>
+<p>Here we install the symlinks for the <code>vi</code> binaries and man pages, so when people execute <code>vi</code>, they actually call the 'vim' binary.</p>
+<pre><code>ln -sv vim /usr/bin/vi
+for L in  /usr/share/man/{,*/}man1/vim.1; do
+    ln -sv vim.1 $(dirname $L)/vi.1
+done
+</code></pre>
+<p>Here we symlink vim so that it appears versioned (in the interest of consistency):</p>
+<pre><code>ln -sv ../vim/vim74/doc /usr/share/doc/vim-7.4
+</code></pre>
+<p>Now we can create the vimrc file:</p>
+<pre><code>cat &gt; /etc/vimrc &lt;&lt; "EOF"
+" Begin /etc/vimrc
+
+set nocompatible
+set backspace=2
+syntax on
+if (&amp;term == "iterm") || (&amp;term == "putty")
+  set background=dark
+endif
+
+" End /etc/vimrc
+EOF
+</code></pre>
+<p class="return"><a href="index.html">Back to top</a></p>
+<h3 id="stripping-binaries-and-libraries">Stripping Binaries and Libraries</h3>
+<p>We can decrease the size of the compiled binaries and libraries by stripping out the debug symbols. This step is optional, but unless you intend to perform debugging, the symbols serve only to consume space.</p>
+<p>This is a good time to backup your destination drive yet again — a single typo here can destroy all of the work performed thus far.</p>
+<h4 id="logoutlogin">Logout/Login</h4>
+<p>It is very important to note that none of the binaries we intend to strip are running. To accomplished this, we can exit the chroot jail and re-enter it with the following two commands:</p>
+<pre><code>logout
+chroot $BROOT /tools/bin/env -i HOME=/root TERM=$TERM PS1='\u:\w\$ ' PATH=/bin:/usr/bin:/sbin:/usr/sbin /tools/bin/bash --login
+</code></pre>
+<h4 id="strip">Strip</h4>
+<p>A large number of 'file format' errors will be reported by these commands. These can be ignored; the files in question are usually script files.</p>
+<pre><code>/tools/bin/find /usr/lib -type f -name \*.a \ -exec /tools/bin/strip --strip-debug {} ';'
+/tools/bin/find /lib /usr/lib -type f -name \*.so* -exec /tools/bin/strip --strip-unneeded {} ';'
+/tools/bin/find /{bin,sbin} /usr/{bin,sbin,libexec} -type f -exec /tools/bin/strip --strip-all {} ';'
+</code></pre>
+<p class="return"><a href="index.html">Back to top</a></p>
+<h2 id="section-6">Section 6</h2>
+<h3 id="cleanup-6">Cleanup</h3>
+<p>Now we can clean some of the extra files left behind by various testing processes:</p>
+<pre><code>rm -rf /tmp/*
+</code></pre>
+<h4 id="cleanup-unused-libraries">Cleanup Unused Libraries</h4>
+<p>There are also some library files used only for testing we can cleanup:</p>
+<pre><code>rm -f /usr/lib/lib{bfd,opcodes}.a
+rm -f /usr/lib/libbz2.a
+rm -f /usr/lib/lib{com_err,e2p,ext2fs,ss}.a
+rm -f /usr/lib/libltdl.a
+rm -f /usr/lib/libfl.a
+rm -f /usr/lib/libfl_pic.a
+rm -f /usr/lib/libz.a
+</code></pre>
+<p class="return"><a href="index.html">Back to top</a></p>
+<h3 id="entering-the-jail-2">Entering the Jail</h3>
+<p>From this point forward, the jail can be re-entered after it has been exited by issuing the following command:</p>
+<pre><code>chroot "$BROOT" /usr/bin/env -i              \
+    HOME=/root TERM="$TERM" PS1='\u:\w\$ ' \
+    PATH=/bin:/usr/bin:/sbin:/usr/sbin     \
+    /bin/bash --login
+</code></pre>
+<h4 id="pseudo-and-virtual-filesystems">Pseudo and Virtual Filesystems</h4>
+<p>These must be re-created and mounted each time you re-enter the jail.</p>
+<p class="return"><a href="index.html">Back to top</a></p>
+<h3 id="installing-the-bootscripts">Installing the Bootscripts</h3>
+<p>These scripts are used to configure the system at boot and ensure an orderly shutdown.</p>
+<h4 id="BROOT-bootscripts">BROOT Bootscripts</h4>
+<p>We're going to make use of the "Linux From Scratch" bootscripts, which we downloaded along with the rest of our source code.</p>
+<p>These install our rc scripts, as well as the scripts needed to bring the system up and down.</p>
+<p>Find these in the <code>/sources</code> directory, un-tar them, and install them:</p>
+<pre><code>make install
+</code></pre>
+<h4 id="sysvinit-bootscripts">Sysvinit Bootscripts</h4>
+<p>Once the kernel is loaded, the <code>init</code> program is usually executed. <code>init</code> needs to be given some configuration directives, which we place in <code>/etc/inittab</code>. Create this file now with the following content:</p>
+<pre><code>id:3:initdefault:
+
+si::sysinit:/etc/rc.d/init.d/rc S
+
+l0:0:wait:/etc/rc.d/init.d/rc 0
+l1:S1:wait:/etc/rc.d/init.d/rc 1
+l2:2:wait:/etc/rc.d/init.d/rc 2
+l3:3:wait:/etc/rc.d/init.d/rc 3
+l4:4:wait:/etc/rc.d/init.d/rc 4
+l5:5:wait:/etc/rc.d/init.d/rc 5
+l6:6:wait:/etc/rc.d/init.d/rc 6
+
+ca:12345:ctrlaltdel:/sbin/shutdown -t1 -a -r now
+
+su:S016:once:/sbin/sulogin
+
+1:2345:respawn:/sbin/agetty --noclear tty1 9600
+2:2345:respawn:/sbin/agetty tty2 9600
+3:2345:respawn:/sbin/agetty tty3 9600
+4:2345:respawn:/sbin/agetty tty4 9600
+5:2345:respawn:/sbin/agetty tty5 9600
+6:2345:respawn:/sbin/agetty tty6 9600
+</code></pre>
+<p class="return"><a href="index.html">Back to top</a></p>
+<h3 id="installing-network-devices">Installing Network Devices</h3>
+<p>Network devices are managed using <code>udev</code>, which provides a script that generates the initial rules for the device. These can be generated by running:</p>
+<pre><code>bash /lib/udev/init-net-rules.sh
+</code></pre>
+<p>The rules file which creates network devices can be examined if needed:</p>
+<pre><code>cat /etc/udev/rules.d/70-persistent-net.rules
+</code></pre>
+<p>Note that you must have the appropriate kernel module loaded (or compiled into the kernel) for your network device to be recognized and used.</p>
+<h4 id="configuring-network-devices">Configuring Network Devices</h4>
+<p>The following content must be placed in <code>/etc/sysconfig/ifconfig.eth0</code> to configure the network device initially:</p>
+<pre><code>cd /etc/sysconfig/
+cat &gt; ifconfig.eth0 &lt;&lt; "EOF"
+ONBOOT=yes
+IFACE=eth0
+SERVICE=ipv4-static
+IP=192.168.1.2
+GATEWAY=192.168.1.1
+PREFIX=24
+BROADCAST=192.168.1.255
+EOF
+</code></pre>
+<h4 id="configuring-domain-name-service-dns-resolution">Configuring Domain Name Service (DNS) Resolution</h4>
+<p>By default, glibc looks in <code>/etc/resolv.conf</code> to determine where to send DNS queries. Create this file with the following contents:</p>
+<pre><code>domain localdomain
+nameserver 8.8.8.8
+nameserver 8.8.4.4
+</code></pre>
+<h4 id="configuring-the-hostname">Configuring the Hostname</h4>
+<p>The hostname is stored in <code>/etc/hostname</code>. The hostname should not be a fully qualified domain name. Create this file with the hostname you prefer.</p>
+<h4 id="configuring-etchosts">Configuring /etc/hosts</h4>
+<p>This file is where we provide IP address to hostname/FQDN mappings. Any number of hosts can be contained in this file, although it is usually better to rely on DNS.</p>
+<p>We'll begin this file with the localhost mapping; create <code>/etc/hosts</code> with the following contents:</p>
+<pre><code>127.0.0.1 localhost localhost.localdomain
+</code></pre>
+<p class="return"><a href="index.html">Back to top</a></p>
+<h3 id="miscellaneous-files">Miscellaneous Files</h3>
+<h4 id="rcsite">rc.site</h4>
+<p>The <code>/etc/rc.site</code> file provides settings that are used by the System V scripts. We're going to create this file with the following content:</p>
+<pre><code>DISTRO="Linux From Scratch" # The distro name
+DISTRO_CONTACT="BROOT-dev@linuxacademy.com" # Bug report address
+DISTRO_MINI="BROOT" # Short name used in filenames for distro config
+
+IPROMPT="yes" # Whether to display the interactive boot prompt
+itime="3"    # The amount of time (in seconds) to display the prompt
+
+wlen=$(echo "Welcome to ${DISTRO}" | wc -c )
+welcome_message="Welcome to ${INFO}${DISTRO}${NORMAL}"
+
+# Set scripts to skip the file system check on reboot
+FASTBOOT=no
+
+# Skip reading from the console
+HEADLESS=no
+
+# Write out fsck progress if yes
+VERBOSE_FSCK=yes
+
+# Speed up boot without waiting for settle in udev
+OMIT_UDEV_SETTLE=n
+
+# Speed up boot without waiting for settle in udev_retry
+OMIT_UDEV_RETRY_SETTLE=no
+
+# Skip cleaning /tmp if yes
+SKIPTMPCLEAN=no
+
+# For setclock
+#UTC=1
+#CLOCKPARAMS=
+
+# For consolelog (Note that the default, 7=debug, is noisy)
+#LOGLEVEL=7
+
+# Delay between TERM and KILL signals at shutdown
+KILLDELAY=3
+</code></pre>
+<h4 id="etcprofile">/etc/profile</h4>
+<p>This file is read by various shells (notably bash) to set environment defaults. We're going to create this file with the following content:</p>
+<pre><code>if [ -x /usr/bin/id ]; then
+    if [ -z "$EUID" ]; then
+        # ksh workaround
+        EUID=`id -u`
+        UID=`id -ru`
+    fi
+    USER="`id -un`"
+    LOGNAME=$USER
+    MAIL="/var/spool/mail/$USER"
+fi
+HOSTNAME=/usr/bin/hostname 2&gt;/dev/null
+HISTSIZE=1000
+
+PATH=/usr/local/bin:/usr/local/sbin:/usr/bin:/usr/sbin:/sbin:/bin
+
+export PATH USER LOGNAME MAIL HOSTNAME HISTSIZE
+</code></pre>
+<p>This file can be amended a number of ways to meet your needs; take a look at <a href="https://tiswww.case.edu/php/chet/bash/bashref.html#Modifying-Shell-Behavior">https://tiswww.case.edu/php/chet/bash/bashref.html#Modifying-Shell-Behavior</a> for more information.</p>
+<h4 id="etcinputrc">/etc/inputrc</h4>
+<p>This file controls keyboard mappings, and the "readline" library (on which bash and other shells rely) uses this file to determine how keyboard input is handled.</p>
+<p>We're going to create a somewhat generic file suitable for just about everyone:</p>
+<pre><code># Allow the command prompt to wrap to the next line
+set horizontal-scroll-mode Off
+
+# Enable 8bit input
+set meta-flag On
+set input-meta On
+
+# Turns off 8th bit stripping
+set convert-meta Off
+
+# Keep the 8th bit for display
+set output-meta On
+
+# none, visible or audible
+set bell-style none
+
+# All of the following map the escape sequence of the value
+# contained in the 1st argument to the readline specific functions
+"\eOd": backward-word
+"\eOc": forward-word
+
+# for linux console
+"\e[1~": beginning-of-line
+"\e[4~": end-of-line
+"\e[5~": beginning-of-history
+"\e[6~": end-of-history
+"\e[3~": delete-char
+"\e[2~": quoted-insert
+
+# for xterm
+"\eOH": beginning-of-line
+"\eOF": end-of-line
+
+# for Konsole
+"\e[H": beginning-of-line
+"\e[F": end-of-line
+</code></pre>
+<h4 id="etcshells">/etc/shells</h4>
+<p>This file contains a list of shells which can be used for the purposes of login. Each shell binary should be on its own line; we'll create this file with the following content:</p>
+<pre><code>/bin/sh
+/bin/bash
+</code></pre>
+<h4 id="etcfstab">/etc/fstab</h4>
+<p>We'll create this file with the following entries. Note that your device names may be different than those listed here; be sure you indicate the proper device name to be used during the boot process, or your system won't boot.</p>
+<p>For example, we've built our distribution on <code>/dev/sdb</code> for most of this course. When we boot, however, it will be from a virtual machine with a single hard drive — so the device name will change to <code>sda</code>. Make sure your entries in <code>fstab</code> reflect the device names that will be present at boot.</p>
+<pre><code>/dev/sda3      /            ext4     defaults            1     1
+/dev/sda4      swap         swap     pri=1               0     0
+/dev/sda2      /boot        ext4     defaults            1     1
+proc           /proc        proc     nosuid,noexec,nodev 0     0
+sysfs          /sys         sysfs    nosuid,noexec,nodev 0     0
+devpts         /dev/pts     devpts   gid=5,mode=620      0     0
+tmpfs          /run         tmpfs    defaults            0     0
+devtmpfs       /dev         devtmpfs mode=0755,nosuid    0     0 
+</code></pre>
+<p>Note that we do not mount <code>/dev/sda1</code>. That partition does not need to be mounted, and in fact, is best left unmounted.</p>
+<p class="return"><a href="index.html">Back to top</a></p>
+<h3 id="building-the-kernel">Building the Kernel</h3>
+<p>We downloaded the source for our kernel during stage 1. You may use a newer version of the kernel if it is available, but it is strongly recommended that you use source code from the stable branch.</p>
+<p>For this course, we're using version 4.8.12 of the kernel source.</p>
+<h4 id="configuring-the-kernel">Configuring the Kernel</h4>
+<p>Kernel configuration is a subject worthy of its own course here at Linux Academy. We cannot cover all of the configuration options in this course but we do cover general configuration. Keep in mind that building the kernel is fairly straightforward once our distro is up and running, so re-building the kernel at a later time is not difficult.</p>
+<h5 id="cleaning-the-kernel-source-tree">Cleaning the Kernel Source Tree</h5>
+<p>Change into the kernel source directory and issue:</p>
+<pre><code>make mrproper
+</code></pre>
+<h5 id="entering-the-kernel-configuration-utility">Entering the Kernel Configuration Utility</h5>
+<p>A text-based menu-driven configuration program is used to select the kernel options; we enter this system by executing:</p>
+<pre><code>make menuconfig
+</code></pre>
+<h5 id="setting-specific-kernel-options">Setting Specific Kernel Options</h5>
+<p>Be sure to set the following options:</p>
+<p><strong>devtmpfs</strong></p>
+<pre><code>Device Drivers —\&gt;
+Generic Driver Options —\&gt;
+\* Maintain a devtmpfs filesystem to mount at /dev
+</code></pre>
+<p><strong>DHCP Support</strong></p>
+<pre><code>Networking Support —\&gt;
+Networking Options -\&gt;
+\&lt;\*\&gt; The IPv6 Protocol        
+</code></pre>
+<h4 id="building-and-installing-the-kernel">Building and Installing the Kernel</h4>
+<p>Once you've configured the kernel, save your configuration. Execute <code>make</code> to build the kernel:</p>
+<pre><code>make
+</code></pre>
+<p>Install the kernel modules:</p>
+<pre><code>make modules_install
+</code></pre>
+<p><strong>NOTE: The <code>/boot</code> partition must be mounted before the following steps are undertaken. Be sure of this.</strong></p>
+<p>Now we need to copy the kernel image to the <code>/boot</code> directory:</p>
+<pre><code>cp -v arch/x86/boot/bzImage /boot/vmlinuz-4.8.12
+</code></pre>
+<p>The same goes for the kernel symbols, which are stored in <code>System.map</code>:</p>
+<pre><code>cp -v System.map /boot/System.map-4.8.12
+</code></pre>
+<p>It's a good idea, as well, to copy the kernel configuration file itself:</p>
+<pre><code>cp -v .config /boot/config-4.8.12
+</code></pre>
+<p>Install the documentation:</p>
+<pre><code>install -d /usr/share/doc/linux-4.8.12
+cp -r Documentation/* /usr/share/doc/linux-4.8.12
+</code></pre>
+<h4 id="configuring-linux-modules">Configuring Linux Modules</h4>
+<p>Now that we've got the kernel image installed, we need to tell the kernel how and in what order to load modules. For USB devices, specifically, we need to load modules in a specific order.</p>
+<p>Create the <code>/etc/modprobe.d</code> directory:</p>
+<pre><code>install -v -m755 -d /etc/modprobe.d
+</code></pre>
+<p>And now, create a <code>usb.conf</code> file in that directory with the following contents:</p>
+<pre><code>install ohci_hcd /sbin/modprobe ehci_hcd ; /sbin/modprobe -i ohci_hcd ; true
+install uhci_hcd /sbin/modprobe ehci_hcd ; /sbin/modprobe -i uhci_hcd ; true
+</code></pre>
+<p class="return"><a href="index.html">Back to top</a></p>
+<h3 id="installing-grub-2">Installing GRUB</h3>
+<p>For this video, we employ GRUB as a bootloader. We strongly encourage you to look at the "Bootloading with GRUB" video on the <a href="http://LinuxAcademy.com">LinuxAcademy.com</a> website, even if you're familiar with GRUB. It is very easy to misconfigure GRUB and end up with an unbootable system.</p>
+<h4 id="creating-the-grub-configuration-file">Creating the GRUB Configuration File</h4>
+<p>We'll create this file with the following content. Note that the value of the <code>set root</code> command must be the <code>/boot</code> partition; the <code>root=</code> entry must specify the location of the <code>/</code> partition. Again, see the "Bootloading With GRUB" video if you do not understand what these things mean.</p>
+<pre><code>set default=0
+set timeout=10 
+
+insmod ext2 biosdisk 
+set root=(hd0,2)
+
+menuentry "Linux 4.8.12" {
+        linux   /boot/vmlinuz-4.8.12 root=/dev/sda2 ro
+}
+</code></pre>
+<h4 id="adding-an-entry-to-an-existing-grub-configuration">Adding an Entry to an Existing GRUB Configuration</h4>
+<p>If you want to add the new distribution to an existing grub configuration, simply add the "menu entry" from the configuration file above. You may have to run <code>grub-update</code> or a similar command to actually update the bootloader.</p>
+<p class="return"><a href="index.html">Back to top</a></p>
+<h3 id="logout-and-reboot">Logout and Reboot</h3>
+<p>We now want to reboot our system. First, let's logout:</p>
+<pre><code>logout
+</code></pre>
+<h4 id="unmount-virtual-filesystems">Unmount Virtual Filesystems</h4>
+<pre><code>umount -v $BROOT/dev/pts
+umount -v $BROOT/dev
+umount -v $BROOT/run
+umount -v $BROOT/proc
+umount -v $BROOT/sys
+</code></pre>
+<h4 id="umount-our-destination-drive">Umount Our Destination Drive</h4>
+<pre><code>umount $BROOT/boot
+umount $BROOT
+</code></pre>
+<h4 id="now-reboot">Now Reboot</h4>
+<pre><code>shutdown -rf now
+</code></pre>
+<p>The system should go down for reboot. If necessary, detach the destination drive and attach it to a new VM or re-configure your virtual machine (or hardware) as needed to boot.</p>
+<h4 id="trouble">Trouble</h4>
+<p>If your system doesn't boot, it's likely you have issues with GRUB. Remember to double-check your device names. Again, the "Bootloading With GRUB" video can be of great help when troubleshooting problems with the bootloader.</p>
+<p class="return"><a href="index.html">Back to top</a></p>
+<h3 id="final-thoughts">Final Thoughts</h3>
+<h4 id="updates">Updates</h4>
+<p>Updates to both the kernel and installed packages are a frequent occurrence. You will need to check monthly, if not weekly, for updates to the source. Updating the packages makes use of the same process by which the packages were built (<code>configure</code>, <code>make</code>, <code>make install</code>) most of the time.</p>
+<h4 id="adding-additional-software">Adding Additional Software</h4>
+<p>Feel free to add additional software as needed. How you do this is entirely up to you — building from source is one option, but keep in mind that constantly rebuilding software from source to stay abreast of security updates and the like is a time-consuming activity.</p>
+
+<h2 id="resources">Resources</h2>
+<p>With special thanks to <a href="http://www.linuxfromscratch.org/">Linux From Scratch</a> for the excellent reference.</p>
+</div>
+    </div>
+</body>
+</head>
