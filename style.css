@@ -1,0 +1,211 @@
+body {
+    margin: 0;
+    padding: 0;
+    font-family: Helvetica, Verdana, sans-serif;
+}
+
+a:link,
+a:visited {
+    color: #29485b;
+    text-decoration: underline;
+}
+
+a:hover {
+    color: #1bb398;
+}
+
+a:active {
+    color: #29485b;
+}
+
+h1 {
+}
+
+h2 {
+    font: bold 25pt Verdana;
+    color: #27475c;
+    margin: 20px 0 10px 0;
+    padding: 0 0 5px 0;
+    border-bottom: 1px solid #27475c;
+}
+
+h3 {
+    font-size: 16pt;
+    padding: 0 0 5px 0;
+}
+
+h4 {
+    text-transform: uppercase;
+    margin: 0;
+    padding: 10px 0 5px 0;
+}
+
+h5 {
+    font-style: italic;
+}
+
+p.intro {
+    color: #999;
+    font-style: italic;
+    margin: 30px 0 0 0;
+    padding: 0;
+}
+
+pre {
+    overflow: auto;
+    padding: 10px;
+    border: 1px #eee solid;
+    background: #eee;
+}
+
+code {
+    font-family: monospace;
+    font-size: 12pt;
+}
+
+ul {
+    padding: 5px 50px;
+}
+
+ul li {
+    padding: 5px 0;
+}
+
+ul li code {
+    font-weight: bold;
+}
+
+strong {
+    color: #1bb398;
+}
+
+em {
+    color: #1bb398;
+}
+
+.return {
+    text-transform: uppercase;
+    font-size: 10pt;
+    font-weight: bold;
+    display: block;
+    text-align: right;
+    border: 1px #eee solid;
+    padding: 10px 5px 5px 5px;
+    margin-bottom: 30px;
+}
+
+.comed{
+    font-size: 10pt;
+    font-weight: bold;
+    display: block;
+    text-align: center;
+    background: #eee;
+    border: 1px #eee solid;
+    padding: 10px 5px 5px 5px;
+    margin-bottom: 30px;
+}
+.return a {
+    text-decoration: none;
+}
+
+#header {
+    width: 100%;
+    background: #27475c;
+    height: 125px;
+}
+
+#hwrapper {
+    margin: 0 auto;
+    width: 80%;
+}
+
+#namespace {
+    padding: 0;
+    margin: 0 10px;
+    float: left;
+    height: 90px;
+}
+
+#namespace h1 {
+    color: #fff;
+    font: 30pt Verdana, sans-serif; 
+}
+
+#logospace {
+    margin: 10px 5px 0 10px;
+    float: right;
+    width: 300px;
+    height: 75px;
+    background: url("./lalogo.png") no-repeat;
+}
+
+#logospaceca {
+    margin: 15px 10px 0 10px;
+    float: right;
+    width: 250px;
+    height: 75px;
+    background: url("./calogo.png") no-repeat;
+    background-size: 250px 75px;
+}
+
+#colorbar {
+    height: 1px;
+    width: 100%;
+    clear: both;
+    background: #305165 url("./colorband.png") center no-repeat;
+}
+
+#wrapper {
+    margin: 0 auto;
+    width: 80%;
+}
+
+#toc {
+    border: 1px #eee solid;
+    margin: 25px 0 0 0;
+    padding: 0 10px;
+    width: 300px;
+    float: left;
+}
+
+#toc a {
+    text-decoration: none;
+    display: block;
+    margin: 15px 0;
+}
+
+#toc a.h2 {
+    font-size: 18pt;
+    border-bottom: 1px #eee solid;
+    font-weight: bold;
+    padding: 10px 0 0 0;
+}
+
+#toc a.h3 {
+    padding: 0 10px;
+}
+
+#content {
+    padding: 10px 10px 10px 350px;
+}
+
+@media screen and (max-width: 1350px) {
+
+    #logospace {
+        margin: 9px 5px 0 10px;
+        float: right;
+        width: 75px;
+        height: 75px;
+        background: url("./lalogo-small.png") no-repeat;
+        background-size: 75px 75px;
+    }
+
+    #logospaceca {
+        margin: 10px 10px 0 10px;
+        float: right;
+        width: 75px;
+        height: 75px;
+        background: url("./calogo-small.png") no-repeat;
+        background-size: 70px 70px;
+    }
+}
