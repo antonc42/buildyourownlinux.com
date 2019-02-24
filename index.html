@@ -359,6 +359,8 @@ wget --input-file=wget-list --no-check-certificate --directory-prefix=$BROOT/sou
 gunzip *.gz
 xz -d *.xz
 </code></pre>
+<p>Extract all the decompressed tarballs</p>
+<pre><code>for t in *.tar; do tar xf $t; done</code></pre>
 <h4 id="change-ownership-of-the-build-directory">Change Ownership of the Build Directory</h4>
 <p>Execute:</p>
 <pre><code>chown -v byol:byol $BROOT
