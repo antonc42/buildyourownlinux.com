@@ -482,27 +482,27 @@ done
 <blockquote>"If case the above seems hard to follow, let's break it down a bit. First we find all the files under the GCC/config directory that are named either <code>linux.h</code>, <code>linux64.h</code> or <code>sysv4.h</code>. For each file found, we copy it to a file of the same name but with an added suffix of <code>.orig</code>. Then the first <code>sed</code> expression prepends <code>/tools</code> to every instance of <code>/lib/ld</code>, <code>/lib64/ld</code>, or <code>/lib32/ld</code>, while the second one replaces hard-coded instances of <code>/usr</code>. Next, we add our define statements which alter the default startfile prefix to the end of the file. Note that the trailing <code>/</code> in <code>/tools/lib/</code> is required. Finally, we use <code>touch</code> to update the timestamp on the copied files. When used in conjunction with <code>cp -u</code>, this prevents unexpected changes to the original files in case the commands are inadvertently run twice."</blockquote>
 <h4 id="configure">Configure</h4>
 <p>Create the build directory and change into it. Run the <code>configure</code> script with the following arguments:</p>
-<pre><code>../configure                                   \
---target=$BTARGET                              \
---prefix=/tools                                \
---with-glibc-version=2.24                      \
---with-sysroot=$BROOT                          \
---with-newlib                                  \
---without-headers                              \
---with-local-prefix=/tools                     \
---with-native-system-header-dir=/tools/include \
---disable-nls                                  \
---disable-shared                               \
---disable-multilib                             \
---disable-decimal-float                        \
---disable-threads                              \
---disable-libatomic                            \
---disable-libgomp                              \
---disable-libmpx                               \
---disable-libquadmath                          \
---disable-libssp                               \
---disable-libvtv                               \
---disable-libstdcxx                            \
+<pre><code>../configure                                                                  \
+--target=$BTARGET                                                             \
+--prefix=/tools                                                               \
+--with-glibc-version=$(ls $BROOT/source/ | grep -oP 'glibc-\K(\d+\.)+\d+$')   \
+--with-sysroot=$BROOT                                                         \
+--with-newlib                                                                 \
+--without-headers                                                             \
+--with-local-prefix=/tools                                                    \
+--with-native-system-header-dir=/tools/include                                \
+--disable-nls                                                                 \
+--disable-shared                                                              \
+--disable-multilib                                                            \
+--disable-decimal-float                                                       \
+--disable-threads                                                             \
+--disable-libatomic                                                           \
+--disable-libgomp                                                             \
+--disable-libmpx                                                              \
+--disable-libquadmath                                                         \
+--disable-libssp                                                              \
+--disable-libvtv                                                              \
+--disable-libstdcxx                                                           \
 --enable-languages=c,c++ 
 </code></pre>
 <ul>
