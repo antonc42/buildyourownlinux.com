@@ -355,9 +355,9 @@ wget --input-file=wget-list --no-check-certificate --directory-prefix=$BROOT/sou
 <p>We do not want the source code files located in our tools directory.</p>
 <h4 id="decompress-and-extract-the-downloaded-files">Decompress and Extract the Downloaded Files</h4>
 <p>All of our source code files will have been compressed with <code>zx</code>, <code>bzip2</code>, or <code>gzip</code>. We can decompress these files by running the following three commands:</p>
-<pre><code>bunzip2 -d \*.bz2
-gunzip \*.gz
-xz -d \*.xz
+<pre><code>bunzip2 -d *.bz2
+gunzip *.gz
+xz -d *.xz
 </code></pre>
 <h4 id="change-ownership-of-the-build-directory">Change Ownership of the Build Directory</h4>
 <p>Execute:</p>
