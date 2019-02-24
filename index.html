@@ -457,14 +457,10 @@ esac
 <p>We are now going to build GCC. Because we're building GCC as a cross-compiler, it will not rely on libraries installed on the build system and instead prefers those packaged with it, or which we explicitly tell <code>configure</code> to look for.</p>
 <h4 id="obtain-the-gcc-dependencies">Obtain the GCC Dependencies</h4>
 <p>First, we need to download the GCC dependencies. We can do that using the following commands to copy the relevant software packages into the GCC source directory. Once they're copied, <code>make</code> finds and builds these dependencies automatically. From the GCC source directory, execute:</p>
-<pre><code>tar -xf ../mpfr-3.1.4.tar
-mv -v mpfr-3.1.4 mpfr
-tar -xf ../gmp-6.1.1.tar
-mv -v gmp-6.1.1 gmp
-tar -xf ../mpc-1.0.3.tar
-mv -v mpc-1.0.3 mpc
+<pre><code>mv -v ../mpfr-*/ mpfr
+mv -v ../gmp-*/ gmp
+mv -v ../mpc-*/ mpc
 </code></pre>
-<p>Note that the software versions may have changed since this guide was written.</p>
 <h4 id="changing-the-default-linker">Changing the Default Linker</h4>
 <p>We need to instruct GCC to use the linker previously installed by our binutils install. The following script (which you should be able to copy and paste to a terminal window) finds the relevant header files and changes the locations where <code>make</code> looks for certain libraries and files. Execute the following in the GCC source code directory:</p>
 <pre><code>for file in \
