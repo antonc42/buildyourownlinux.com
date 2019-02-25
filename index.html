@@ -663,7 +663,7 @@ cp -v ld/ld-new /tools/bin
 <h3 id="building-gcc-natively">Building GCC Natively</h3>
 <h4 id="replacing-the-internal-gcc-limitsh-header">Replacing the Internal GCC limits.h Header</h4>
 <p>GCC initially uses a self-provided <code>limits.h</code> file for the building of the temporary toolchain. Now, we want GCC to use a full set of definitions written in the limits headers. To ensure this, we concatenate several of GCC's internal files to create a single <code>limits.h</code> file:</p>
-<pre><code>cat gcc/limitx.h gcc/glimits.h gcc/limity.h &gt; dirname $($BTARGET-gcc -print-libgcc-file-name)/include-fixed/limits.h
+<pre><code>cat gcc/limitx.h gcc/glimits.h gcc/limity.h > $(dirname $($BTARGET-gcc -print-libgcc-file-name))/include-fixed/limits.h
 </code></pre>
 <h4 id="changing-the-default-linker-again">Changing the Default Linker (Again)</h4>
 <p>Once again, we want GCC to use the linker installed in our <code>/tools</code> directory:</p>
