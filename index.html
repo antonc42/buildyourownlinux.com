@@ -614,7 +614,7 @@ readelf -l a.out | grep ': /tools'
 --disable-nls                   \
 --disable-libstdcxx-threads     \
 --disable-libstdcxx-pch         \
---with-gxx-include-dir=/tools/$BTARGET/include/c++/6.2.0</code></pre>
+--with-gxx-include-dir=/tools/$BTARGET/include/c++/$(ls $BROOT/source/ | grep -oP 'gcc-\K(\d+\.)+\d+$')</code></pre>
 <h4>Make</h4>
 <pre><code>make -j2
 make install</code></pre>
