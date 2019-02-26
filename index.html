@@ -112,7 +112,7 @@
 <p>Notice we undertake the whole of this course in a virtual machine running in VirtualBox; we do this to facilitate the building of Linux in a clean environment.</p>
 <p>Any virtualization environment will do, provided you have access to the console, as it may be necessary at various points. Actual hardware is also acceptable, if those resources are readily available to you.</p>
 <h4 id="build-system-disk-partitions">Build System Disk Partitions</h4>
-<p>The build system — the virtual machine we use to build Linux — uses the following disk layout. This output is from the <code>parted print all</code> command:</p>
+<p>The build system - the virtual machine we use to build Linux - uses the following disk layout. This output is from the <code>parted print all</code> command:</p>
 <pre><code>Number  Start   End     Size    Type     File system     Flags
 1      1049kB  525MB   524MB   primary  ext4            boot
 2      525MB   19.3GB  18.8GB  primary  ext4
@@ -412,7 +412,7 @@ export BROOT BTARGET LC_ALL PATH
 <h2 id="section-3">Section 3</h2>
 <h3 id="stage-1-building-a-temporary-toolchain">Stage 1: Building a Temporary Toolchain</h3>
 <p>The first stage of the build process entails building a toolchain capable of producing executables for our target platform. Because our target platform differs (in terms of the target triplet) from the platform on which we are building it (the build system), we need to first build a toolchain that is can be used in a "standalone" fashion. The ensures that we avoid any dependency on the build system environment or libraries.</p>
-<p>Note that for Stage 1 builds, we don't execute the test suites for the software packages installed. The reason for this is simple — the dependencies required to run the tests, such as TCL, have not yet been installed, and the tests will likely fail.</p>
+<p>Note that for Stage 1 builds, we don't execute the test suites for the software packages installed. The reason for this is simple - the dependencies required to run the tests, such as TCL, have not yet been installed, and the tests will likely fail.</p>
 <p>Running the tests ceases to be optional once we reach Stage 3, however.</p>
 <p class="return"><a href="index.html">Back to top</a></p>
 <h3 id="compiling-binutils">Compiling Binutils</h3>
@@ -556,7 +556,7 @@ done
 <h3 id="building-glibc">Building glibc</h3>
 <h4 id="configure-2">Configure</h4>
 <p>Run the <code>configure</code> script with the following arguments. Note the exported variables; be sure to unset these when the build process is complete!</p>
-<p>The <code>libc_cv_forced_unwind</code> variable impacts the handling of the <code>—force-unwind</code> configuration parameter. The linker we installed when we compiled <code>binutils</code> is cross-compiled and cannot make use of the <code>—force-unwind</code> option unless glibc is present. This variable disables this test.</p>
+<p>The <code>libc_cv_forced_unwind</code> variable impacts the handling of the <code>--force-unwind</code> configuration parameter. The linker we installed when we compiled <code>binutils</code> is cross-compiled and cannot make use of the <code>--force-unwind</code> option unless glibc is present. This variable disables this test.</p>
 <p>The <code>libc_cv_c_cleanup</code> variables instruct configure to disable the test for this functionality, again for the same reasons given for <code>libc\_cv\_forced\_unwind</code>.</p>
 <p>The commands for the configuration process should look like this:</p>
 <pre><code>export libc_cv_forced_unwind=yes
@@ -598,7 +598,7 @@ readelf -l a.out | grep ': /tools'
 <p>If everything is working as it should be, the <code>grep</code> command should return this output:</p>
 <pre><code>[Requesting program interpreter: /tools/lib64/ld-linux-x86-64.so.2]
 </code></pre>
-<p>If the output is different — particularly if the program interpreter is located on the build system's filesystem hierarchy (<code>lib/ld-linux-x86-64.so.2</code>, etc.) - then something has gone wrong.</p>
+<p>If the output is different - particularly if the program interpreter is located on the build system's filesystem hierarchy (<code>lib/ld-linux-x86-64.so.2</code>, etc.) - then something has gone wrong.</p>
 <p>Delete the build directories, check environment variables and start over. Continuing will result in a toolchain that is broken in odd ways which are not immediately apparent.</p>
 <p>Be sure to delete all of the <code>dummy.*</code> files when you're done testing.</p>
 <p class="return"><a href="index.html">Back to top</a></p>
@@ -654,7 +654,7 @@ export RANLIB=$BTARGET-ranlib
 <pre><code>make install
 </code></pre>
 <h4 id="prepare-the-linker-for-upcoming-adjustments">Prepare the Linker for Upcoming Adjustments</h4>
-<p>The following commands clean out the build directory for the <code>ld</code> utility, and then rebuilds the same. We specify the <code>LIB_PATH</code> to override the default value used by the temporary toolchain — this is the default library search path.</p>
+<p>The following commands clean out the build directory for the <code>ld</code> utility, and then rebuilds the same. We specify the <code>LIB_PATH</code> to override the default value used by the temporary toolchain - this is the default library search path.</p>
 <pre><code>make -C ld clean
 make -C ld LIB_PATH=/usr/lib:/lib
 cp -v ld/ld-new /tools/bin
@@ -724,11 +724,11 @@ readelf -l a.out | grep ': /tools'
 <p>If everything is working as it should be, the <code>grep</code> command should return this output:</p>
 <pre><code>[Requesting program interpreter: /tools/lib64/ld-linux-x86-64.so.2]
 </code></pre>
-<p>If the output is different — particularly if the program interpreter is located on the build system's filesystem hierarchy (<code>lib/ld-linux-x86-64.so.2</code>, etc.), then something has gone wrong.</p>
+<p>If the output is different - particularly if the program interpreter is located on the build system's filesystem hierarchy (<code>lib/ld-linux-x86-64.so.2</code>, etc.), then something has gone wrong.</p>
 <p>Return to the last sanity check and re-trace your steps. Continuing will result in a broken toolchain that will likely not compile or link correctly.</p>
 <p class="return"><a href="index.html">Back to top</a></p>
 <h3 id="test-suite-dependencies">Test Suite Dependencies</h3>
-<p>The test suite used for our toolchain requires a handful of dependencies. During the first and second compilation passes of binutils GCC, and Glibc, we didn't allow <code>make</code> to execute tests — as the necessary programs were missing, there was no point in doing so.</p>
+<p>The test suite used for our toolchain requires a handful of dependencies. During the first and second compilation passes of binutils GCC, and Glibc, we didn't allow <code>make</code> to execute tests - as the necessary programs were missing, there was no point in doing so.</p>
 <p>At this stage, however, we most certainly do want to run the tests to make sure our toolchain is set up properly.</p>
 <p>We downloaded the source code for the programs used in testing during Stage 1. Now we need to compile and install them. Unless it is otherwise noted, you'll need to extract the source code directories from the appropriate tar file in <code>/sources</code>, <code>cd</code> into it and execute the <code>configure</code> and <code>make</code> commands. It is assumed from this point forward that you have extracted the source and are in the resulting directory. Note that most of these utilities do not require the use or creation of a separate 'build' directory.</p>
 <h4 id="regarding-make-and-make-install">Regarding make and make install</h4>
@@ -844,7 +844,7 @@ make install
 make install
 </code></pre>
 <h4 id="diffutils-file-findutils-and-gawk">Diffutils, File, Findutils, and Gawk</h4>
-<p>These software packages use identical configuration and compilation/install steps. Execute these steps for each of these packages — be sure not to skip any.</p>
+<p>These software packages use identical configuration and compilation/install steps. Execute these steps for each of these packages - be sure not to skip any.</p>
 <h5 id="configure-11">Configure</h5>
 <pre><code>./configure --prefix=/tools
 </code></pre>
@@ -871,7 +871,7 @@ make -C src xgettext
 <pre><code>cp -v src/{msgfmt,msgmerge,xgettext} /tools/bin
 </code></pre>
 <h4 id="grep-gzip-and-m4">Grep, Gzip, and M4</h4>
-<p>These software packages use identical configuration and compilation/install steps. Execute these steps for each of these packages — be sure not to skip any.</p>
+<p>These software packages use identical configuration and compilation/install steps. Execute these steps for each of these packages - be sure not to skip any.</p>
 <h5 id="configure-13">Configure</h5>
 <pre><code>./configure --prefix=/tools
 </code></pre>
@@ -881,7 +881,7 @@ make install
 </code></pre>
 <h4 id="make-2">Make</h4>
 <h5 id="configure-14">Configure</h5>
-<p>Here we pass the <code>—without-guile</code> flag to <code>configure</code>. While these libraries may be available on the build system, they are not on our destination, and we don't want make to depend on them for that reason.</p>
+<p>Here we pass the <code>--without-guile</code> flag to <code>configure</code>. While these libraries may be available on the build system, they are not on our destination, and we don't want make to depend on them for that reason.</p>
 <pre><code>./configure --prefix=/tools --without-guile
 </code></pre>
 <h5 id="compile-and-install-8">Compile and Install</h5>
@@ -947,7 +947,7 @@ make install
 <p class="return"><a href="index.html">Back to top</a></p>
 <h3 id="stripping-optional">Stripping (Optional)</h3>
 <p>Now that we've got a temporary system built and installed, we can save some space by removing the debug symbols from our binaries and our libraries.</p>
-<p>This command will result in quit a "File format not recognized" warning messages. This is normal — if you examine the file indicated in the message, you can note that the file in question is usually a script file, not a binary.</p>
+<p>This command will result in quit a "File format not recognized" warning messages. This is normal - if you examine the file indicated in the message, you can note that the file in question is usually a script file, not a binary.</p>
 <p>Please be <em>very</em> careful with this step. It is very easy to strip the wrong files and delete most of the libraries we've just built and installed.</p>
 <p>THIS STEP IS OPTIONAL.</p>
 <h4 id="strip-the-debug-symbols-from-our-libraries">Strip the Debug Symbols from Our Libraries</h4>
@@ -985,7 +985,7 @@ BTARGET=x86_64-BROOT-linux-gnu
 <p class="return"><a href="index.html">Back to top</a></p>
 <h3 id="changing-file-ownership">Changing File Ownership</h3>
 <p>Now that we've installed our binaries and libraries, we need to change their ownership.</p>
-<p>We've built and installed our binaries and libraries using the <em>byol</em> user so far. Our destination system, however, does not have any users defined. This poses a minor security risk — a user could be created with a user ID identical to that of the <em>byol</em> user on the build system, which would then have access to all our binaries.</p>
+<p>We've built and installed our binaries and libraries using the <em>byol</em> user so far. Our destination system, however, does not have any users defined. This poses a minor security risk - a user could be created with a user ID identical to that of the <em>byol</em> user on the build system, which would then have access to all our binaries.</p>
 <p>The simplest way to restrict access is to make <em>root</em> the owner of these files, as the superuser ID is identical across all systems:</p>
 <pre><code>chown -R root:root $BROOT/tools
 </code></pre>
@@ -1010,7 +1010,7 @@ drwxr-xr-x  4 root root  4096 Nov 30 17:50 x86_64-pc-linux-gnu
 <p class="return"><a href="index.html">Back to top</a></p>
 <h3 id="backing-up">Backing Up</h3>
 <p>Now that we've got a complete (albeit temporary) system, it would be wise to backup our work. If you're using a virtual machine, exporting the VM as an OVA file is one way of ensuring you've got a patent backup.</p>
-<p>You may choose to <code>tar</code> the <code>/build</code> directory — whatever works. The point is that you'll be able to restore the environment to the state it is in now with minimal effort at some point in the future.</p>
+<p>You may choose to <code>tar</code> the <code>/build</code> directory - whatever works. The point is that you'll be able to restore the environment to the state it is in now with minimal effort at some point in the future.</p>
 <p>This is important, particularly as a time-saver: Everything we do from this point will alter the binaries and libraries we've built and installed, so there is a possibility things will break irreparably.</p>
 <p><em>BE SURE TO DOUBLE CHECK YOUR ENVIRONMENT AS PER "Switching to Root" BEFORE CONTINUING.</em></p>
 <p class="return"><a href="index.html">Back to top</a></p>
@@ -1066,7 +1066,7 @@ fi
 <p>We're now ready to enter the jail and continue the final build of our distribution.</p>
 <p><em>IF YOU REBOOT, YOU MUST RE-POPULATE <code>/dev</code> AND RE-MOUNT THE PSEUDO/VIRTUAL FILESYSTEMS AS NOTED IN THE PREVIOUS SECTION.</em></p>
 <h4 id="caveats">Caveats</h4>
-<p>The jail provides limited functionality — we've only installed the most basic of tools. At this stage, the goals are to simulate a running destination system and protect the build system from damage. This is why environment variables and filesystem mounts are so important.</p>
+<p>The jail provides limited functionality - we've only installed the most basic of tools. At this stage, the goals are to simulate a running destination system and protect the build system from damage. This is why environment variables and filesystem mounts are so important.</p>
 <h4 id="entering-the-jail">Entering the Jail</h4>
 <p>You must be logged in as the superuser to execute the <code>chroot</code> command. Note that we specify the <code>$BROOT</code> for bash, which will adopt this location as the root directory of the jail. The "HOME", "TERM", "PATH" and prompt environment variables are passed in to set up our environment inside the jail. Other parameters are explained below:</p>
 <pre><code>chroot "$BROOT" /tools/bin/env -i HOME=/root TERM="$TERM" PS1='\u:\w\$ ' PATH=/bin:/usr/bin:/sbin:/usr/sbin:/tools/bin /tools/bin/bash --login +h
@@ -2762,7 +2762,7 @@ EOF
 <p class="return"><a href="index.html">Back to top</a></p>
 <h3 id="stripping-binaries-and-libraries">Stripping Binaries and Libraries</h3>
 <p>We can decrease the size of the compiled binaries and libraries by stripping out the debug symbols. This step is optional, but unless you intend to perform debugging, the symbols serve only to consume space.</p>
-<p>This is a good time to backup your destination drive yet again — a single typo here can destroy all of the work performed thus far.</p>
+<p>This is a good time to backup your destination drive yet again - a single typo here can destroy all of the work performed thus far.</p>
 <h4 id="logoutlogin">Logout/Login</h4>
 <p>It is very important to note that none of the binaries we intend to strip are running. To accomplished this, we can exit the chroot jail and re-enter it with the following two commands:</p>
 <pre><code>logout
@@ -2978,7 +2978,7 @@ set bell-style none
 </code></pre>
 <h4 id="etcfstab">/etc/fstab</h4>
 <p>We'll create this file with the following entries. Note that your device names may be different than those listed here; be sure you indicate the proper device name to be used during the boot process, or your system won't boot.</p>
-<p>For example, we've built our distribution on <code>/dev/sdb</code> for most of this course. When we boot, however, it will be from a virtual machine with a single hard drive — so the device name will change to <code>sda</code>. Make sure your entries in <code>fstab</code> reflect the device names that will be present at boot.</p>
+<p>For example, we've built our distribution on <code>/dev/sdb</code> for most of this course. When we boot, however, it will be from a virtual machine with a single hard drive - so the device name will change to <code>sda</code>. Make sure your entries in <code>fstab</code> reflect the device names that will be present at boot.</p>
 <pre><code>/dev/sda3      /            ext4     defaults            1     1
 /dev/sda4      swap         swap     pri=1               0     0
 /dev/sda2      /boot        ext4     defaults            1     1
@@ -3006,12 +3006,12 @@ devtmpfs       /dev         devtmpfs mode=0755,nosuid    0     0
 <h5 id="setting-specific-kernel-options">Setting Specific Kernel Options</h5>
 <p>Be sure to set the following options:</p>
 <p><strong>devtmpfs</strong></p>
-<pre><code>Device Drivers —\&gt;
-Generic Driver Options —\&gt;
+<pre><code>Device Drivers -\&gt;
+Generic Driver Options -\&gt;
 \* Maintain a devtmpfs filesystem to mount at /dev
 </code></pre>
 <p><strong>DHCP Support</strong></p>
-<pre><code>Networking Support —\&gt;
+<pre><code>Networking Support -\&gt;
 Networking Options -\&gt;
 \&lt;\*\&gt; The IPv6 Protocol        
 </code></pre>
@@ -3089,7 +3089,7 @@ umount $BROOT
 <h4 id="updates">Updates</h4>
 <p>Updates to both the kernel and installed packages are a frequent occurrence. You will need to check monthly, if not weekly, for updates to the source. Updating the packages makes use of the same process by which the packages were built (<code>configure</code>, <code>make</code>, <code>make install</code>) most of the time.</p>
 <h4 id="adding-additional-software">Adding Additional Software</h4>
-<p>Feel free to add additional software as needed. How you do this is entirely up to you — building from source is one option, but keep in mind that constantly rebuilding software from source to stay abreast of security updates and the like is a time-consuming activity.</p>
+<p>Feel free to add additional software as needed. How you do this is entirely up to you - building from source is one option, but keep in mind that constantly rebuilding software from source to stay abreast of security updates and the like is a time-consuming activity.</p>
 
 <h2 id="resources">Resources</h2>
 <p>With special thanks to <a href="http://www.linuxfromscratch.org/">Linux From Scratch</a> for the excellent reference.</p>
