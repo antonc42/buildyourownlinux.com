@@ -359,8 +359,6 @@ wget --input-file=wget-list --no-check-certificate --directory-prefix=$BROOT/sou
 gunzip *.gz
 xz -d *.xz
 </code></pre>
-<p>Extract all the decompressed tarballs</p>
-<pre><code>for t in *.tar; do tar xf $t; done</code></pre>
 <h4 id="change-ownership-of-the-build-directory">Change Ownership of the Build Directory</h4>
 <p>Execute:</p>
 <pre><code>chown -v byol:byol $BROOT
@@ -457,9 +455,9 @@ esac
 <p>We are now going to build GCC. Because we're building GCC as a cross-compiler, it will not rely on libraries installed on the build system and instead prefers those packaged with it, or which we explicitly tell <code>configure</code> to look for.</p>
 <h4 id="obtain-the-gcc-dependencies">Obtain the GCC Dependencies</h4>
 <p>First, we need to download the GCC dependencies. We can do that using the following commands to copy the relevant software packages into the GCC source directory. Once they're copied, <code>make</code> finds and builds these dependencies automatically. From the GCC source directory, execute:</p>
-<pre><code>mv -v ../mpfr-*/ mpfr
-mv -v ../gmp-*/ gmp
-mv -v ../mpc-*/ mpc
+<pre><code>mkdir mpfr; tar -xf $(ls ../mpfr*.tar | tail -n1) -C mpfr --strip-components=1
+mkdir gmp; tar -xf $(ls ../gmp*.tar | tail -n1) -C gmp --strip-components=1
+mkdir mpc; tar -xf $(ls ../mpc*.tar | tail -n3) -C mpc --strip-components=1
 </code></pre>
 <h4 id="changing-the-default-linker">Changing the Default Linker</h4>
 <p>We need to instruct GCC to use the linker previously installed by our binutils install. The following script (which you should be able to copy and paste to a terminal window) finds the relevant header files and changes the locations where <code>make</code> looks for certain libraries and files. Execute the following in the GCC source code directory:</p>
