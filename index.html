@@ -928,9 +928,10 @@ make install
 </code></pre>
 <h5 id="install-6">Install</h5>
 <p>We only need a few of the libraries we've built, so we'll copy these to our destination manually:</p>
-<pre><code>cp -v perl cpan/podlators/scripts/pod2man /tools/bin
-mkdir -pv /tools/lib/perl5/5.24.0
-cp -Rv lib/* /tools/lib/perl5/5.24.0
+<pre><code>PERLVER=$(ls ../perl*.tar | /bin/grep  -oP '(\d+\.)+\d+')
+cp -v perl cpan/podlators/scripts/pod2man /tools/bin
+mkdir -pv /tools/lib/perl5/$PERLVER
+cp -Rv lib/* /tools/lib/perl5/$PERLVER
 </code></pre>
 <h4 id="sed-tar-and-texinfo">sed, tar, and texinfo</h4>
 <h5 id="configure-17">Configure</h5>
