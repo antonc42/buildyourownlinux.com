@@ -843,12 +843,23 @@ make install
 <pre><code>make
 make install
 </code></pre>
-<h4 id="diffutils-file-findutils-and-gawk">Diffutils, File, Findutils, and Gawk</h4>
+<h4 id="diffutils-file-and-gawk">Diffutils, File, and Gawk</h4>
 <p>These software packages use identical configuration and compilation/install steps. Execute these steps for each of these packages - be sure not to skip any.</p>
 <h5 id="configure-11">Configure</h5>
 <pre><code>./configure --prefix=/tools
 </code></pre>
 <h5 id="compile-and-install-6">Compile and Install</h5>
+<pre><code>make
+make install
+</code></pre>
+<h4 id="findutils">Findutils</h4>
+<p>Make some fixes required by glibc-2.28 and later</p>
+<pre><code>sed -i 's/IO_ftrylockfile/IO_EOF_SEEN/' gl/lib/*.c
+sed -i '/unistd/a #include &lt;sys/sysmacros.h&gt;' gl/lib/mountlist.c
+echo "#define _IO_IN_BACKUP 0x100" &gt;&gt; gl/lib/stdio-impl.h</code></pre>
+<h5 id="configure-11-5">Configure</h5>
+<pre><code>./configure --prefix=/tools</code></pre>
+<h5 id="compile-and-install-6-5">Compile and Install</h5>
 <pre><code>make
 make install
 </code></pre>
