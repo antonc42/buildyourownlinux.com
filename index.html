@@ -728,7 +728,7 @@ readelf -l a.out | grep ': /tools'
 <h3 id="test-suite-dependencies">Test Suite Dependencies</h3>
 <p>The test suite used for our toolchain requires a handful of dependencies. During the first and second compilation passes of binutils GCC, and Glibc, we didn't allow <code>make</code> to execute tests - as the necessary programs were missing, there was no point in doing so.</p>
 <p>At this stage, however, we most certainly do want to run the tests to make sure our toolchain is set up properly.</p>
-<p>We downloaded the source code for the programs used in testing during Stage 1. Now we need to compile and install them. Unless it is otherwise noted, you'll need to extract the source code directories from the appropriate tar file in <code>/sources</code>, <code>cd</code> into it and execute the <code>configure</code> and <code>make</code> commands. It is assumed from this point forward that you have extracted the source and are in the resulting directory. Note that most of these utilities do not require the use or creation of a separate 'build' directory.</p>
+<p>We downloaded the source code for the programs used in testing during Stage 1. Now we need to compile and install them. Unless it is otherwise noted, you'll need to extract the source code directories from the appropriate tar file in <code>/source</code>, <code>cd</code> into it and execute the <code>configure</code> and <code>make</code> commands. It is assumed from this point forward that you have extracted the source and are in the resulting directory. Note that most of these utilities do not require the use or creation of a separate 'build' directory.</p>
 <h4 id="regarding-make-and-make-install">Regarding make and make install</h4>
 <p>These commands can typically run one after another.</p>
 <pre><code>make &amp;&amp; make install
@@ -1212,7 +1212,7 @@ chmod -v 600  /var/log/btmp
 <p>Just as during the second stage build, we need to extract the kernel headers for GCC and other programs that need them. Note that we're installing them in a different location this time.</p>
 <h4 id="extracting-the-kernel-header-files-2">Extracting the Kernel Header Files</h4>
 <p>Change into the kernel source directory:
-/sources/linux-4.x</p>
+/source/linux-4.x</p>
 <p>Change into this directory and issue the following command:</p>
 <pre><code>make mrproper
 </code></pre>
@@ -2829,7 +2829,7 @@ rm -f /usr/lib/libz.a
 <h4 id="BROOT-bootscripts">BROOT Bootscripts</h4>
 <p>We're going to make use of the "Linux From Scratch" bootscripts, which we downloaded along with the rest of our source code.</p>
 <p>These install our rc scripts, as well as the scripts needed to bring the system up and down.</p>
-<p>Find these in the <code>/sources</code> directory, un-tar them, and install them:</p>
+<p>Find these in the <code>/source</code> directory, un-tar them, and install them:</p>
 <pre><code>make install
 </code></pre>
 <h4 id="sysvinit-bootscripts">Sysvinit Bootscripts</h4>
