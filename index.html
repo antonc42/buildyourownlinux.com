@@ -1230,6 +1230,18 @@ chmod -v 600  /var/log/btmp
 <pre><code>make install
 </code></pre>
 <p class="return"><a href="index.html">Back to top</a></p>
+<h3 id="installing-bison">Installing bison</h3>
+<p>This package does not require the use of a build directory.</p>
+<h4 id="configure-28">Configure</h4>
+<pre><code>./configure --prefix=/usr --docdir=/usr/share/doc/bison-3.0.4
+</code></pre>
+<h4 id="compile-19">Compile</h4>
+<pre><code>make 
+</code></pre>
+<h4 id="install-23">Install</h4>
+<pre><code>make install 
+</code></pre>
+<p class="return"><a href="index.html">Back to top</a></p>
 <h3 id="building-glibc-stage-3">Building Glibc, Stage 3</h3>
 <p>This is our final build of glibc!</p>
 <h4 id="patching-the-source">Patching the Source</h4>
@@ -1237,8 +1249,11 @@ chmod -v 600  /var/log/btmp
 <pre><code>cp ../glibc-$(pwd | grep -Eo '([0-9]+\.)+[0-9]+')-fhs-1.patch .
 patch -Np1 -i glibc-$(pwd | grep -Eo '([0-9]+\.)+[0-9]+')-fhs-1.patch
 </code></pre>
+<p>The Glibc documentation recommends building Glibc in a dedicated build directory</p>
+<pre><code>mkdir -v build
+cd build</code></pre>
 <h4 id="configure-20">Configure</h4>
-<pre><code>./configure --prefix=/usr          \
+<pre><code>../configure --prefix=/usr          \
              --enable-kernel=2.6.32 \
              --enable-obsolete-rpc
 </code></pre>
@@ -1247,7 +1262,7 @@ patch -Np1 -i glibc-$(pwd | grep -Eo '([0-9]+\.)+[0-9]+')-fhs-1.patch
 <pre><code>make
 </code></pre>
 <h4 id="test">Test</h4>
-<p>Unlike previous build stages, we now have all of the dependencies needed to run the tests against our binaries before we install them. <em>This step is critical!</em> Any problems with them build toolchain, the environment, library paths, etc., will likely reveal themselves at this point.</p>
+<p>Unlike previous build stages, we now have all of the dependencies needed to run the tests against our binaries before we install them. <em>This step is critical!</em> Any problems with the build toolchain, the environment, library paths, etc., will likely reveal themselves at this point.</p>
 <pre><code>make check
 </code></pre>
 <p>Note that you will have some of the tests fail, in particular those related to the <code>getaddrinfo</code> functions. Overall, your output from <code>make check</code> should look something like this:</p>
@@ -1927,18 +1942,6 @@ mv -v /usr/bin/killall /bin
 <pre><code>make check
 </code></pre>
 <h4 id="install-22">Install</h4>
-<pre><code>make install 
-</code></pre>
-<p class="return"><a href="index.html">Back to top</a></p>
-<h3 id="installing-bison">Installing bison</h3>
-<p>This package does not require the use of a build directory.</p>
-<h4 id="configure-28">Configure</h4>
-<pre><code>./configure --prefix=/usr --docdir=/usr/share/doc/bison-3.0.4
-</code></pre>
-<h4 id="compile-19">Compile</h4>
-<pre><code>make 
-</code></pre>
-<h4 id="install-23">Install</h4>
 <pre><code>make install 
 </code></pre>
 <p class="return"><a href="index.html">Back to top</a></p>
