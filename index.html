@@ -1234,11 +1234,11 @@ chmod -v 600  /var/log/btmp
 <p>This is our final build of glibc!</p>
 <h4 id="patching-the-source">Patching the Source</h4>
 <p>To ensure compliance with the FHS, we need to patch the glibc source code. Execute the following commands to copy the patch file to the source directory and apply the patch:</p>
-<pre><code>cp ../glibc-2.24-fhs-1.patch .
-patch -Np1 -i glibc-2.24-fhs-1.patch
+<pre><code>cp ../glibc-$(pwd | grep -Eo '([0-9]+\.)+[0-9]+')-fhs-1.patch .
+patch -Np1 -i glibc-$(pwd | grep -Eo '([0-9]+\.)+[0-9]+')-fhs-1.patch
 </code></pre>
 <h4 id="configure-20">Configure</h4>
-<pre><code>../configure --prefix=/usr          \
+<pre><code>./configure --prefix=/usr          \
              --enable-kernel=2.6.32 \
              --enable-obsolete-rpc
 </code></pre>
